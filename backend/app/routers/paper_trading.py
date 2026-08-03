@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import get_db
 from app.models import ClientAccount, Trade, TradeStatus
 from app.pipeline import run_pipeline
-from app.routers.trades import _trade_to_response
+from app.routers.trades import _fetch_history, _count_open_exceptions, _trade_fields_to_resp
 from app.schemas import TradeCreateRequest, TradeResponse
 
 router = APIRouter(prefix="/paper-trading", tags=["paper-trading"])
@@ -36,4 +36,11 @@ async def create_paper_trade(
     db.add(trade)
     await db.flush()
     trade = await run_pipeline(trade, db, simulated=True)
-    return _trade_to_response(trade, client.name)
+    history = await _fetch_history(db, trade.id)
+    exc_count = await _count_open_exceptions(db, trade.id)
+    return _trade_fields_to_resp(
+        trade,
+        history=history,
+        exception_count=exc_count,
+        client_name=client.name,
+    )

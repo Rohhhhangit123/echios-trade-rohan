@@ -39,6 +39,12 @@ async def run_stage(trade: Trade, session: AsyncSession, simulated: bool = False
         )
         return False, None
 
+    created_ts = trade.created_at if trade.created_at else func.now()
+    parent_trade_id = trade.parent_trade_id
+    if parent_trade_id is None:
+        parent_clause = Trade.parent_trade_id.is_(None)
+    else:
+        parent_clause = Trade.parent_trade_id == parent_trade_id
     stmt = (
         select(func.count())
         .select_from(Trade)
@@ -50,15 +56,9 @@ async def run_stage(trade: Trade, session: AsyncSession, simulated: bool = False
             Trade.quantity == trade.quantity,
             Trade.price == trade.price,
             Trade.simulated == trade.simulated,
-            or_(
-                and_(
-                    trade.parent_trade_id.is_(None),
-                    Trade.parent_trade_id.is_(None),
-                ),
-                Trade.parent_trade_id == trade.parent_trade_id,
-            ),
+            parent_clause,
             func.date_trunc("minute", Trade.created_at)
-            >= func.date_trunc("minute", trade.created_at if trade.created_at else func.now())
+            >= func.date_trunc("minute", created_ts)
             - func.make_interval(0, 0, 0, 0, 0, 1),
         )
     )

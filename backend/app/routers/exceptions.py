@@ -19,7 +19,7 @@ from app.schemas import (
     ExceptionResponse,
     TradeResponse,
 )
-from app.routers.trades import _trade_to_response
+from app.routers.trades import _fetch_history, _count_open_exceptions, _trade_fields_to_resp
 
 router = APIRouter(prefix="/exceptions", tags=["exceptions"])
 
@@ -82,4 +82,11 @@ async def resolve_exception(
 
     trade = await resolve_exception_and_rerun(db, exc, resolution_note=body.resolution_note)
     client = await db.get(ClientAccount, trade.client_id)
-    return _trade_to_response(trade, client.name if client else None)
+    history = await _fetch_history(db, trade.id)
+    exc_count = await _count_open_exceptions(db, trade.id)
+    return _trade_fields_to_resp(
+        trade,
+        history=history,
+        exception_count=exc_count,
+        client_name=client.name if client else None,
+    )

@@ -27,19 +27,67 @@ from app.schemas import (
 router = APIRouter(prefix="/trades", tags=["trades"])
 
 
-def _trade_to_response(trade: Trade, client_name: Optional[str] = None) -> TradeResponse:
-    history = [
-        TradeHistoryEntryResponse.model_validate(h)
-        for h in sorted(trade.history or [], key=lambda h: (h.created_at, h.id))
-    ]
-    exc_count = sum(1 for e in (trade.exceptions or []) if e.status == ExceptionStatus.OPEN)
+async def _fetch_history(db: AsyncSession, trade_id: int) -> list[TradeHistoryEntryResponse]:
+    rows = (await db.execute(
+        select(TradeHistory)
+        .where(TradeHistory.trade_id == trade_id)
+        .order_by(TradeHistory.created_at, TradeHistory.id)
+    )).scalars().all()
+    return [TradeHistoryEntryResponse.model_validate(r) for r in rows]
+
+
+async def _count_open_exceptions(db: AsyncSession, trade_id: int) -> int:
+    stmt = (
+        select(func.count(TradeException.id))
+        .where(
+            TradeException.trade_id == trade_id,
+            TradeException.status == ExceptionStatus.OPEN,
+        )
+    )
+    return (await db.execute(stmt)).scalar_one() or 0
+
+
+def _trade_fields_to_resp(
+    trade: Trade,
+    *,
+    history: list[TradeHistoryEntryResponse],
+    exception_count: int,
+    client_name: Optional[str] = None,
+) -> TradeResponse:
     notional = (trade.filled_quantity or trade.quantity) * trade.price
-    resp = TradeResponse.model_validate(trade)
-    resp.history = history
-    resp.exception_count = exc_count
-    resp.notional = notional
-    if client_name:
-        resp.client_name = client_name
+    resp = TradeResponse(
+        id=trade.id,
+        client_id=trade.client_id,
+        client_name=client_name,
+        instrument=trade.instrument,
+        side=trade.side.value if hasattr(trade.side, "value") else trade.side,
+        quantity=trade.quantity,
+        filled_quantity=trade.filled_quantity,
+        price=trade.price,
+        currency=trade.currency,
+        status=trade.status.value if hasattr(trade.status, "value") else trade.status,
+        last_successful_stage=(
+            trade.last_successful_stage.value
+            if (trade.last_successful_stage and hasattr(trade.last_successful_stage, "value"))
+            else trade.last_successful_stage
+        ),
+        parent_trade_id=trade.parent_trade_id,
+        simulated=trade.simulated,
+        counterparty_id=trade.counterparty_id,
+        settlement_mode=(
+            trade.settlement_mode.value
+            if hasattr(trade.settlement_mode, "value")
+            else trade.settlement_mode
+        ),
+        settlement_failed=trade.settlement_failed,
+        isin=trade.isin,
+        entity=trade.entity,
+        notional=notional,
+        created_at=trade.created_at,
+        updated_at=trade.updated_at,
+        history=history,
+        exception_count=exception_count,
+    )
     return resp
 
 
@@ -67,7 +115,9 @@ async def create_trade(
     db.add(trade)
     await db.flush()
     trade = await run_pipeline(trade, db, simulated=False)
-    return _trade_to_response(trade, client.name)
+    history = await _fetch_history(db, trade.id)
+    exc_count = await _count_open_exceptions(db, trade.id)
+    return _trade_fields_to_resp(trade, history=history, exception_count=exc_count, client_name=client.name)
 
 
 @router.get("/{trade_id}", response_model=TradeResponse)
@@ -82,19 +132,9 @@ async def get_trade(trade_id: int, db: AsyncSession = Depends(get_db)) -> TradeR
     if row is None:
         raise HTTPException(status_code=404, detail=f"Trade {trade_id} not found")
     trade, client_name = row
-    if trade.history == []:
-        hist = (await db.execute(
-            select(TradeHistory)
-            .where(TradeHistory.trade_id == trade.id)
-            .order_by(TradeHistory.created_at, TradeHistory.id)
-        )).scalars().all()
-        trade.history = hist
-    if trade.exceptions == []:
-        excs = (await db.execute(
-            select(TradeException).where(TradeException.trade_id == trade.id)
-        )).scalars().all()
-        trade.exceptions = excs
-    return _trade_to_response(trade, client_name)
+    history = await _fetch_history(db, trade.id)
+    exc_count = await _count_open_exceptions(db, trade.id)
+    return _trade_fields_to_resp(trade, history=history, exception_count=exc_count, client_name=client_name)
 
 
 @router.get("", response_model=TradeListResponse)
@@ -131,5 +171,10 @@ async def list_trades(
         .offset(offset)
     )
     rows = (await db.execute(stmt)).all()
-    items = [_trade_to_response(trade, name) for trade, name in rows]
+    items = []
+    for trade, name in rows:
+        history = await _fetch_history(db, trade.id)
+        exc_count = await _count_open_exceptions(db, trade.id)
+        items.append(_trade_fields_to_resp(trade, history=history, exception_count=exc_count, client_name=name))
     return TradeListResponse(items=items, total=total)
+    

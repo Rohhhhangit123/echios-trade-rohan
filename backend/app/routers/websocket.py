@@ -33,3 +33,4 @@ async def ws_trades(websocket: WebSocket) -> None:
             "message": f"client {client_id[:8]} disconnected",
             "connected_clients": len(ws_manager.active_connections),
         })
+        
