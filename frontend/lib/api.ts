@@ -33,6 +33,7 @@ import type {
   GenaiExplainExceptionResponse,
   GenaiParseOrderResponse,
   PortfolioSummary,
+  Tick,
   Trade,
   TradeException,
   TradeListResponse,
@@ -125,4 +126,14 @@ export const api = {
       `/genai/explain-exception/${exceptionId}`,
       { method: "POST", body: "{}" },
     ),
+
+  getTick: (symbol: string) =>
+    request<Tick>(`/market/tick?symbol=${encodeURIComponent(symbol)}`),
+
+  getCandles: (symbol: string, count = 200) =>
+  request<{ symbol: string; candles: Tick[] }>(
+    `/market/candles?symbol=${encodeURIComponent(symbol)}&count=${count}`,
+  ),
+ 
 };
+

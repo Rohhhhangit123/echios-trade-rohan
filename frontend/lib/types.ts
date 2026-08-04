@@ -147,3 +147,17 @@ export interface WsMessage {
   reason?: string;
   breaking_field?: string | null;
 }
+
+export type Tick = {
+  symbol: string;
+  timestamp: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  mid: number;
+  bid: number;
+  ask: number;
+  spread: number;
+};

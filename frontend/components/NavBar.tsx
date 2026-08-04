@@ -10,6 +10,7 @@ import {
   LineChart,
   PlusCircle,
   Sparkles,
+  CandlestickChart,
 } from "lucide-react";
 
 const NAV = [
@@ -18,6 +19,7 @@ const NAV = [
   { href: "/portfolio", label: "Portfolio", icon: Briefcase },
   { href: "/trade-entry", label: "Trade Entry", icon: PlusCircle },
   { href: "/paper-trading", label: "Paper Trading", icon: Sparkles },
+  { href: "/charts", label: "Charts", icon: CandlestickChart },
 ];
 
 export default function NavBar() {
