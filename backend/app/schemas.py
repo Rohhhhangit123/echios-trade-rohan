@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -163,6 +163,31 @@ class GenaiExplainExceptionResponse(_Base):
     likely_root_cause: Optional[str] = None
     suggested_fix: Optional[str] = None
     raw: Optional[str] = None
+
+
+class AssistantHistoryMessage(_Base):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., min_length=1, max_length=4000)
+
+
+class AssistantChatRequest(_Base):
+    message: str = Field(..., min_length=2, max_length=2000)
+    history: list[AssistantHistoryMessage] = Field(default_factory=list, max_length=8)
+
+
+class AssistantDataSource(_Base):
+    label: str
+    detail: str
+
+
+class AssistantChatResponse(_Base):
+    client_id: int
+    client_name: str
+    summary: str
+    insights: list[str] = Field(default_factory=list)
+    suggestions: list[str] = Field(default_factory=list)
+    sources: list[AssistantDataSource] = Field(default_factory=list)
+    disclaimer: str
 
 
 # ---------- Misc ----------

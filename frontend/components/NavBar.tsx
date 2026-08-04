@@ -6,6 +6,7 @@ import clsx from "clsx";
 import {
   Activity,
   AlertTriangle,
+  Bot,
   Briefcase,
   LineChart,
   PlusCircle,
@@ -18,6 +19,7 @@ const NAV = [
   { href: "/portfolio", label: "Portfolio", icon: Briefcase },
   { href: "/trade-entry", label: "Trade Entry", icon: PlusCircle },
   { href: "/paper-trading", label: "Paper Trading", icon: Sparkles },
+  { href: "/assistant", label: "AI Assistant", icon: Bot },
 ];
 
 export default function NavBar() {

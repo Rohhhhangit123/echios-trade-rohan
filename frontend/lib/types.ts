@@ -130,6 +130,26 @@ export interface GenaiExplainExceptionResponse {
   raw: string | null;
 }
 
+export interface AssistantHistoryMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface AssistantDataSource {
+  label: string;
+  detail: string;
+}
+
+export interface AssistantChatResponse {
+  client_id: number;
+  client_name: string;
+  summary: string;
+  insights: string[];
+  suggestions: string[];
+  sources: AssistantDataSource[];
+  disclaimer: string;
+}
+
 export interface WsMessage {
   type:
     | "system"

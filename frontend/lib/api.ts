@@ -30,6 +30,8 @@ async function request<T>(
 }
 
 import type {
+  AssistantChatResponse,
+  AssistantHistoryMessage,
   GenaiExplainExceptionResponse,
   GenaiParseOrderResponse,
   PortfolioSummary,
@@ -125,4 +127,10 @@ export const api = {
       `/genai/explain-exception/${exceptionId}`,
       { method: "POST", body: "{}" },
     ),
+
+  assistantChat: (message: string, history: AssistantHistoryMessage[]) =>
+    request<AssistantChatResponse>("/genai/assistant", {
+      method: "POST",
+      body: JSON.stringify({ message, history }),
+    }),
 };
