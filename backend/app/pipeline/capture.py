@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from sqlalchemy import and_, func, or_, select
@@ -39,28 +40,36 @@ async def run_stage(trade: Trade, session: AsyncSession, simulated: bool = False
         )
         return False, None
 
-    created_ts = trade.created_at if trade.created_at else func.now()
+    created_naive: datetime
+    if isinstance(trade.created_at, datetime):
+        created_naive = trade.created_at.replace(tzinfo=None) if trade.created_at.tzinfo else trade.created_at
+    else:
+        created_naive = datetime.utcnow()
+    threshold = created_naive - timedelta(minutes=1)
+
     parent_trade_id = trade.parent_trade_id
     if parent_trade_id is None:
         parent_clause = Trade.parent_trade_id.is_(None)
     else:
         parent_clause = Trade.parent_trade_id == parent_trade_id
+
+    base_conditions = [
+        Trade.client_id == trade.client_id,
+        Trade.instrument == trade.instrument,
+        Trade.side == trade.side,
+        Trade.quantity == trade.quantity,
+        Trade.price == trade.price,
+        Trade.simulated == trade.simulated,
+        parent_clause,
+        Trade.created_at >= threshold,
+    ]
+    if trade.id is not None:
+        base_conditions.append(Trade.id != trade.id)
+
     stmt = (
         select(func.count())
         .select_from(Trade)
-        .where(
-            Trade.id != trade.id,
-            Trade.client_id == trade.client_id,
-            Trade.instrument == trade.instrument,
-            Trade.side == trade.side,
-            Trade.quantity == trade.quantity,
-            Trade.price == trade.price,
-            Trade.simulated == trade.simulated,
-            parent_clause,
-            func.date_trunc("minute", Trade.created_at)
-            >= func.date_trunc("minute", created_ts)
-            - func.make_interval(0, 0, 0, 0, 0, 1),
-        )
+        .where(and_(*base_conditions))
     )
     result = await session.execute(stmt)
     dup_count = result.scalar_one() or 0
