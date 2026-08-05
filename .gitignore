@@ -9,6 +9,11 @@ backend/.env
 backend/venv/
 backend/.cache/
 
+# SQLite local dev database
+*.db
+*.db-shm
+*.db-wal
+
 # Node / Next.js
 node_modules/
 .next/
