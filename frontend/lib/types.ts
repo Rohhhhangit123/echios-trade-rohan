@@ -159,7 +159,9 @@ export interface AssistantChatResponse {
   insights: AssistantClaim[];
   suggestions: AssistantClaim[];
   citations: AssistantCitation[];
+}
 export type UserRole = "ADMIN" | "TRADER" | "COMPLIANCE" | "VIEWER";
+
 
 export interface User {
   id: number;
