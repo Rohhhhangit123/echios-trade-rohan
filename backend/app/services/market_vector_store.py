@@ -23,6 +23,7 @@ from app.config import get_settings
 
 DATA_ROOT = Path(__file__).resolve().parents[3] / "data"
 DEFAULT_CACHE_ROOT = Path(__file__).resolve().parents[2] / ".cache"
+BUNDLED_MODEL_ROOT = Path(__file__).resolve().parents[2] / "models"
 INDEX_SCHEMA_VERSION = "1"
 HISTORICAL_CHUNK_ROWS = 7
 
@@ -58,15 +59,21 @@ class FastEmbedBackend:
             from fastembed import TextEmbedding
 
             self._cache_dir.mkdir(parents=True, exist_ok=True)
-            local_model_dir = self._cache_dir / f"manual-{self.name.rsplit('/', 1)[-1]}"
-            local_model_ready = (
-                (local_model_dir / "tokenizer.json").exists()
-                and any(local_model_dir.glob("*.onnx"))
+            model_directory_name = f"manual-{self.name.rsplit('/', 1)[-1]}"
+            bundled_model_dir = BUNDLED_MODEL_ROOT / model_directory_name
+            cached_model_dir = self._cache_dir / model_directory_name
+            local_model_dir = next(
+                (
+                    path
+                    for path in (bundled_model_dir, cached_model_dir)
+                    if (path / "tokenizer.json").exists() and any(path.glob("*.onnx"))
+                ),
+                None,
             )
             self._model = TextEmbedding(
                 model_name=self.name,
                 cache_dir=str(self._cache_dir),
-                specific_model_path=str(local_model_dir) if local_model_ready else None,
+                specific_model_path=str(local_model_dir) if local_model_dir else None,
             )
         return self._model
 
