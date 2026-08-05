@@ -2,10 +2,12 @@
 backend/.venv/
 __pycache__/
 *.pyc
+server.*.log
 
 .env
 backend/.env
 backend/venv/
+backend/.cache/
 
 # Node / Next.js
 node_modules/
@@ -15,3 +17,5 @@ build/
 
 # Mac
 .DS_Store
+
+/data

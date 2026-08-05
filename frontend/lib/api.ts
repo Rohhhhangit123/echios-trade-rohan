@@ -105,6 +105,8 @@ async function request<T>(
 }
 
 import type {
+  AssistantChatResponse,
+  AssistantHistoryMessage,
   GenaiExplainExceptionResponse,
   GenaiParseOrderResponse,
   LoginRequest,
@@ -230,6 +232,11 @@ export const api = {
       { method: "POST", body: "{}" },
     ),
 
+  assistantChat: (message: string, history: AssistantHistoryMessage[]) =>
+    request<AssistantChatResponse>("/genai/assistant", {
+      method: "POST",
+      body: JSON.stringify({ message, history }),
+    }),
   getTick: (symbol: string) =>
     request<Tick>(`/market/tick?symbol=${encodeURIComponent(symbol)}`),
 
