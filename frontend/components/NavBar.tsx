@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Sparkles,
   User as UserIcon,
+  CandlestickChart,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import type { UserRole } from "@/lib/types";
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/portfolio", label: "Portfolio", icon: Briefcase },
   { href: "/trade-entry", label: "Trade Entry", icon: PlusCircle },
   { href: "/paper-trading", label: "Paper Trading", icon: Sparkles },
+  { href: "/charts", label: "Charts", icon: CandlestickChart },
 ];
 
 const ROLE_STYLES: Record<UserRole, string> = {

@@ -14,6 +14,7 @@ from app.routers import auth, exceptions, genai, paper_trading, portfolio, trade
 from app.routers.auth import seed_default_admin_if_needed
 from app.schemas import HealthResponse
 from app.websocket_manager import ws_manager
+from app.routers import market
 
 settings = get_settings()
 
@@ -63,8 +64,9 @@ app.include_router(exceptions.router, prefix="/api")
 app.include_router(portfolio.router, prefix="/api")
 app.include_router(paper_trading.router, prefix="/api")
 app.include_router(genai.router, prefix="/api")
-app.include_router(websocket.router)
 
+app.include_router(websocket.router)  # no /api prefix for WS endpoint
+app.include_router(market.router, prefix="/api")
 
 @app.get("/health", response_model=HealthResponse, tags=["health"])
 async def health() -> HealthResponse:
