@@ -11,6 +11,8 @@ export const ALL_PAGES: NavItemDef[] = [
   { href: "/portfolio", label: "Portfolio" },
   { href: "/trade-entry", label: "Trade Entry" },
   { href: "/paper-trading", label: "Paper Trading" },
+  { href: "/charts", label: "Charts" },
+  { href: "/assistant", label: "Assistant" },
 ];
 
 // Display label per role — kept separate from the backend UserRole enum value
@@ -25,9 +27,9 @@ export const ROLE_DISPLAY_NAME: Record<UserRole, string> = {
 // Pages each persona is wired to see. Admin always sees everything.
 export const ROLE_PAGES: Record<UserRole, string[]> = {
   ADMIN: ALL_PAGES.map((p) => p.href),
-  TRADER: ["/dashboard", "/trade-entry", "/paper-trading"],
+  TRADER: ["/dashboard", "/trade-entry", "/paper-trading", "/charts"],
   COMPLIANCE: ["/exceptions", "/dashboard"],
-  VIEWER: ["/portfolio"],
+  VIEWER: ["/portfolio", "/assistant"],
 };
 
 // Where each persona lands after login / when hitting a page they can't see.
