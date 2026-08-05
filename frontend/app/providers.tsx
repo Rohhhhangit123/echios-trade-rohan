@@ -5,11 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import NavBar from "@/components/NavBar";
+import { ROLE_HOME, canAccessPage } from "@/lib/personas";
 
 const PUBLIC_PATHS = ["/login", "/register"];
 
 function ShellInner({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -20,18 +21,23 @@ function ShellInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return;
     if (isPublic) {
-      if (isAuthenticated) {
+      if (isAuthenticated && user) {
         const sp = new URLSearchParams(window.location.search);
-        const next = sp.get("next") || "/dashboard";
-        router.replace(next);
+        const next = sp.get("next");
+        const home = ROLE_HOME[user.role];
+        router.replace(next && canAccessPage(user.role, next) ? next : home);
       }
       return;
     }
     if (!isAuthenticated) {
       const next = encodeURIComponent(pathname + window.location.search);
       router.replace(`/login?next=${next}`);
+      return;
     }
-  }, [isAuthenticated, isLoading, isPublic, pathname, router]);
+    if (user && !canAccessPage(user.role, pathname)) {
+      router.replace(ROLE_HOME[user.role]);
+    }
+  }, [isAuthenticated, isLoading, isPublic, pathname, router, user]);
 
   if (isLoading && !isPublic) {
     return (

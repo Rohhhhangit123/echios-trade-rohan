@@ -20,6 +20,7 @@ import {
 
 interface AuthContextValue {
   user: User | null;
+  realUser: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -33,22 +34,49 @@ interface AuthContextValue {
   logout: () => void;
   refreshUser: () => Promise<void>;
   hasRole: (...roles: UserRole[]) => boolean;
+  viewRole: UserRole | null;
+  setViewRole: (role: UserRole | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const PUBLIC_PATHS = ["/login", "/register", "/_next", "/favicon.ico"];
+const VIEW_ROLE_KEY = "echios_view_role_override";
+
+function getStoredViewRole(): UserRole | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.sessionStorage.getItem(VIEW_ROLE_KEY);
+  return (raw as UserRole | null) ?? null;
+}
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => getStoredUser());
+  const [realUser, setRealUser] = useState<User | null>(() => getStoredUser());
   const [isLoading, setIsLoading] = useState<boolean>(() => !!getStoredToken());
   const [error, setError] = useState<string | null>(null);
+  const [viewRole, setViewRoleState] = useState<UserRole | null>(() => getStoredViewRole());
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = !!realUser;
+
+  // viewRole lets any signed-in user preview the app as a different persona
+  // (nav + landing page only — there is no server-side authorization in this app).
+  const user: User | null =
+    realUser && viewRole ? { ...realUser, role: viewRole } : realUser;
+
+  const setViewRole = useCallback((role: UserRole | null) => {
+    setViewRoleState(role);
+    if (typeof window === "undefined") return;
+    if (role) {
+      window.sessionStorage.setItem(VIEW_ROLE_KEY, role);
+    } else {
+      window.sessionStorage.removeItem(VIEW_ROLE_KEY);
+    }
+  }, []);
+
+  const setUser = setRealUser;
 
   const refreshUser = useCallback(async () => {
     const token = getStoredToken();
@@ -141,10 +169,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearAuthStorage();
     setUser(null);
     setError(null);
+    setViewRole(null);
     if (typeof window !== "undefined") {
       window.location.href = "/login";
     }
-  }, []);
+  }, [setViewRole]);
 
   const hasRole = useCallback(
     (...roles: UserRole[]) => {
@@ -158,6 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
+      realUser,
       isAuthenticated,
       isLoading,
       error,
@@ -166,8 +196,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       refreshUser,
       hasRole,
+      viewRole,
+      setViewRole,
     }),
-    [user, isAuthenticated, isLoading, error, login, register, logout, refreshUser, hasRole],
+    [
+      user,
+      realUser,
+      isAuthenticated,
+      isLoading,
+      error,
+      login,
+      register,
+      logout,
+      refreshUser,
+      hasRole,
+      viewRole,
+      setViewRole,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

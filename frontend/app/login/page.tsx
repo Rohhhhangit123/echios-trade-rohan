@@ -30,27 +30,27 @@ const DEMO_USERS = [
     email: "trader@echios.local",
     password: "trader123",
     role: "TRADER",
-    label: "Enter & manage trades",
+    label: "STP pipeline & paper trading",
   },
   {
     email: "compliance@echios.local",
     password: "compliance123",
-    role: "COMPLIANCE",
-    label: "Review & resolve exceptions",
+    role: "RISK MANAGER",
+    label: "Exceptions, audit & mitigation",
   },
   {
     email: "viewer@echios.local",
     password: "viewer123",
-    role: "VIEWER",
-    label: "Read-only dashboard",
+    role: "ASSET MANAGER",
+    label: "Portfolio & diversification",
   },
 ];
 
 const ROLE_STYLES: Record<string, string> = {
   ADMIN: "bg-rose-500/15 text-rose-300 border-rose-500/30",
   TRADER: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  COMPLIANCE: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  VIEWER: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+  "RISK MANAGER": "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  "ASSET MANAGER": "bg-sky-500/15 text-sky-300 border-sky-500/30",
 };
 
 const FEATURES = [
@@ -292,7 +292,7 @@ function LoginContent() {
 
                   <p className="mt-5 text-[11px] leading-relaxed text-slate-500">
                     Default admin seeded on first start: <span className="text-slate-400">admin@echios.local / admin123</span>.
-                    Demo users: trader / compliance / viewer (passwords: trader123, compliance123, viewer123).
+                    Demo users: trader / risk manager / asset manager (passwords: trader123, compliance123, viewer123).
                     Change defaults after first login.
                   </p>
                 </>
