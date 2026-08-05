@@ -66,35 +66,39 @@ async def run_stage(trade: Trade, session: AsyncSession, simulated: bool = False
         if trade.side == Side.BUY:
             pass
         await _upsert_position(session, trade, signed_qty)
+        internal_cash = -cash_delta
+        internal_sec = signed_qty
         session.add(LedgerEntry(
             trade_id=trade.id, client_id=trade.client_id, entry_type="SETTLE_DVP",
-            cash_delta=-cash_delta, security=trade.instrument,
-            security_delta=signed_qty, currency=trade.currency,
+            cash_delta=internal_cash, security=trade.instrument,
+            security_delta=internal_sec, currency=trade.currency,
         ))
         session.add(LedgerEntry(
             trade_id=trade.id, client_id=trade.client_id, entry_type="BANK_DVP",
-            cash_delta=-cash_delta, security=trade.instrument,
-            security_delta=signed_qty, currency=trade.currency, is_bank=True,
+            cash_delta=-internal_cash, security=trade.instrument,
+            security_delta=-internal_sec, currency=trade.currency, is_bank=True,
         ))
         note = (
-            f"DVP settled: cash {-cash_delta:,.2f} {trade.currency} "
-            f"<-> securities {signed_qty} {trade.instrument}"
+            f"DVP settled: cash {internal_cash:,.2f} {trade.currency} "
+            f"<-> securities {internal_sec} {trade.instrument}"
         )
     else:
         await _upsert_position(session, trade, signed_qty)
+        internal_sec = signed_qty
+        internal_cash = -cash_delta
         session.add(LedgerEntry(
             trade_id=trade.id, client_id=trade.client_id, entry_type="SETTLE_FOP",
-            cash_delta=Decimal("0"), security=trade.instrument,
-            security_delta=signed_qty, currency=trade.currency,
+            cash_delta=internal_cash, security=trade.instrument,
+            security_delta=internal_sec, currency=trade.currency,
         ))
         session.add(LedgerEntry(
             trade_id=trade.id, client_id=trade.client_id, entry_type="BANK_FOP",
-            cash_delta=-cash_delta, security=None,
-            security_delta=Decimal("0"), currency=trade.currency, is_bank=True,
+            cash_delta=-internal_cash, security=trade.instrument,
+            security_delta=-internal_sec, currency=trade.currency, is_bank=True,
         ))
         note = (
             f"FOP settled: securities {signed_qty} {trade.instrument} moved "
-            f"(unlinked from cash {-cash_delta:,.2f} {trade.currency})"
+            f"(unlinked cash leg recorded: {-cash_delta:,.2f} {trade.currency})"
         )
 
     trade.status = TradeStatus.SETTLED

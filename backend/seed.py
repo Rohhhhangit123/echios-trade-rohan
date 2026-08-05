@@ -4,13 +4,20 @@ import asyncio
 from datetime import date, timedelta
 from decimal import Decimal
 
-from app.db import Base, AsyncSessionLocal, engine
+import app.db as db_module
+from app.config import get_settings
+from app.db import Base, init_db
 from app.models import (
     ClientAccount,
     KycStatus,
     Position,
     ReferenceDatum,
+    User,
+    UserRole,
 )
+from app.security import hash_password
+from app.routers.auth import seed_default_admin_if_needed
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -67,13 +74,17 @@ POSITION_SEED: list[Position] = []
 
 
 async def create_all_tables() -> None:
-    async with engine.begin() as conn:
+    if db_module.engine is None:
+        raise RuntimeError("Database engine not initialized. Call init_db() first.")
+    async with db_module.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     print("OK: tables created")
 
 
 async def seed_all() -> None:
-    async with AsyncSessionLocal() as session:
+    if db_module.AsyncSessionLocal is None:
+        raise RuntimeError("Database session not initialized. Call init_db() first.")
+    async with db_module.AsyncSessionLocal() as session:
         from sqlalchemy import select
 
         existing = await session.execute(select(ReferenceDatum))
@@ -103,9 +114,56 @@ async def seed_all() -> None:
         await session.commit()
 
 
+async def seed_default_users() -> None:
+    if db_module.AsyncSessionLocal is None:
+        raise RuntimeError("Database session not initialized. Call init_db() first.")
+    async with db_module.AsyncSessionLocal() as session:
+        admin = await seed_default_admin_if_needed(session)
+        if admin:
+            print(f"OK: seeded default admin user: {admin.email}")
+        else:
+            settings = get_settings()
+            print(f"OK: users table already has entries; default admin ({settings.default_admin_email}) skipped")
+
+        existing_count = (await session.execute(select(func.count(User.id)))).scalar_one()
+        if existing_count <= 1:
+            demo_users = [
+                User(
+                    email="trader@echios.local",
+                    full_name="Sarah Trader",
+                    hashed_password=hash_password("trader123"),
+                    role=UserRole.TRADER,
+                    is_active=True,
+                ),
+                User(
+                    email="compliance@echios.local",
+                    full_name="Mike Compliance",
+                    hashed_password=hash_password("compliance123"),
+                    role=UserRole.COMPLIANCE,
+                    is_active=True,
+                ),
+                User(
+                    email="viewer@echios.local",
+                    full_name="Olivia Viewer",
+                    hashed_password=hash_password("viewer123"),
+                    role=UserRole.VIEWER,
+                    is_active=True,
+                ),
+            ]
+            for u in demo_users:
+                found = await session.execute(select(User).where(User.email == u.email))
+                if not found.scalars().first():
+                    session.add(u)
+                    print(f"OK: seeded demo user: {u.email} / role={u.role.value}")
+            await session.commit()
+
+
 async def main() -> None:
+    await init_db()
+    print(f"Active backend: {db_module.active_backend}")
     await create_all_tables()
     await seed_all()
+    await seed_default_users()
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -12,6 +12,7 @@ from app.models import (
     SettlementMode,
     Side,
     TradeStatus,
+    UserRole,
 )
 
 
@@ -207,3 +208,48 @@ class HealthResponse(_Base):
     status: str
     database: str
     version: str
+
+
+EmailLike = Annotated[
+    str,
+    Field(
+        pattern=r"^[^\s@]+@[^\s@]+\.[^\s@]+$",
+        min_length=3,
+        max_length=254,
+        description="Email-like identifier; accepts .local / internal domains.",
+    ),
+]
+
+
+# ---------- Auth / Users ----------
+
+class LoginRequest(_Base):
+    email: EmailLike
+    password: str
+
+
+class TokenResponse(_Base):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"
+    expires_in: int
+    user: "UserResponse"
+
+
+class RegisterRequest(_Base):
+    email: EmailLike
+    password: str = Field(min_length=6, max_length=128)
+    full_name: str = Field(min_length=1, max_length=255)
+    role: UserRole = UserRole.VIEWER
+
+
+class UserResponse(_Base):
+    id: int
+    email: EmailLike
+    full_name: str
+    role: UserRole
+    is_active: bool
+    last_login_at: Optional[datetime]
+    created_at: datetime
+
+
+TokenResponse.model_rebuild()

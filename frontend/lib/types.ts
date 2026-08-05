@@ -159,6 +159,35 @@ export interface AssistantChatResponse {
   insights: AssistantClaim[];
   suggestions: AssistantClaim[];
   citations: AssistantCitation[];
+export type UserRole = "ADMIN" | "TRADER" | "COMPLIANCE" | "VIEWER";
+
+export interface User {
+  id: number;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  is_active: boolean;
+  last_login_at: string | null;
+  created_at: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  full_name: string;
+  role?: UserRole;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: "bearer";
+  expires_in: number;
+  user: User;
 }
 
 export interface WsMessage {
@@ -178,3 +207,17 @@ export interface WsMessage {
   reason?: string;
   breaking_field?: string | null;
 }
+
+export type Tick = {
+  symbol: string;
+  timestamp: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  mid: number;
+  bid: number;
+  ask: number;
+  spread: number;
+};

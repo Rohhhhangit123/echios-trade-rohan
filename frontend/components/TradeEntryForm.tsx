@@ -19,6 +19,8 @@ import type {
   Side,
 } from "@/lib/types";
 import StageProgress from "./StageProgress";
+import { useEffect, useRef } from "react"; // add useEffect, useRef to existing useState/useCallback import
+import { useLiveTick } from "@/hooks/useLiveTick";
 
 const CLIENT_CHOICES: Array<{ id: number; label: string }> = [
   { id: 1, label: "#1 Acme Capital Partners (KYC OK)" },
@@ -147,7 +149,24 @@ export default function TradeEntryForm({
         ? "focus:border-violet-500 focus:ring-violet-500/30 border-violet-500 box-shadow_violet"
         : "focus:border-indigo-500 focus:ring-indigo-500/30",
     icon: accentTone === "violet" ? "text-violet-400" : "text-indigo-400",
+    spreadBadge:
+      accentTone === "violet"
+        ? "bg-violet-500/15 text-violet-200 ring-violet-500/30"
+        : "bg-indigo-500/15 text-indigo-200 ring-indigo-500/30",
   };
+  const { tick } = useLiveTick(form.instrument);
+  const hasPrefilled = useRef(false);
+
+  // Prefill the price field exactly once, the first time a live tick
+  // arrives after mount. Never fires again after that (not on instrument
+  // change, not on subsequent polls) — the field is fully user-owned
+  // after this point, same as before.
+  useEffect(() => {
+    if (tick && !hasPrefilled.current) {
+      setForm((prev) => ({ ...prev, price: String(tick.mid) }));
+      hasPrefilled.current = true;
+    }
+  }, [tick]);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
@@ -239,6 +258,23 @@ export default function TradeEntryForm({
                 onChange={(e) => setField("price", e.target.value)}
                 className={inputClass}
               />
+              {tick && (
+                <div className="mt-1.5 flex items-center gap-2">
+                  <span
+                    className={clsx(
+                      "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset",
+                      toneClasses.spreadBadge,
+                    )}
+                  >
+                    {tick.spread.toFixed(2)} spread
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    bid <span className="font-mono text-slate-400">{tick.bid.toFixed(2)}</span>
+                    {" — "}
+                    ask <span className="font-mono text-slate-400">{tick.ask.toFixed(2)}</span>
+                  </span>
+                </div>
+              )}
             </div>
 
             <div>
