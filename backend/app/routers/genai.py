@@ -21,12 +21,6 @@ from app.services.genai_service import GenaiNotConfiguredError, explain_exceptio
 
 router = APIRouter(prefix="/genai", tags=["genai"])
 
-ASSISTANT_DISCLAIMER = (
-    "Educational analysis based on stored account records and simulated market/news data. "
-    "It is not financial advice and does not use live market information."
-)
-
-
 @router.post("/parse-order", response_model=GenaiParseOrderResponse)
 async def genai_parse_order(body: GenaiParseOrderRequest) -> GenaiParseOrderResponse:
     try:
@@ -60,15 +54,13 @@ async def genai_assistant(
     body: AssistantChatRequest,
     db: AsyncSession = Depends(get_db),
 ) -> AssistantChatResponse:
-    # Authentication is intentionally stubbed until Clerk integration lands.
-    # Replace this server-side setting with the authenticated user-to-client mapping;
-    # never accept an arbitrary client_id from the browser.
+    # Resolve client identity server-side; never accept an arbitrary client_id from the browser.
     settings = get_settings()
     as_of = settings.simulation_as_of or date.today()
     try:
-        client, context, sources = await build_assistant_context(
+        client, context, citations = await build_assistant_context(
             db,
-            client_id=settings.assistant_stub_client_id,
+            client_id=settings.assistant_client_id,
             question=body.message,
             as_of=as_of,
         )
@@ -80,6 +72,7 @@ async def genai_assistant(
             message=body.message,
             history=[item.model_dump() for item in body.history],
             context=context,
+            citations=citations,
         )
     except GenaiNotConfiguredError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
@@ -87,9 +80,7 @@ async def genai_assistant(
         raise HTTPException(status_code=502, detail=f"Anthropic assistant error: {exc}") from exc
 
     return AssistantChatResponse(
-        client_id=client.id,
-        client_name=client.name,
-        sources=sources,
-        disclaimer=ASSISTANT_DISCLAIMER,
+        client_id=client["id"],
+        client_name=client["name"],
         **result,
     )

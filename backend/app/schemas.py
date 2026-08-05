@@ -175,19 +175,30 @@ class AssistantChatRequest(_Base):
     history: list[AssistantHistoryMessage] = Field(default_factory=list, max_length=8)
 
 
-class AssistantDataSource(_Base):
+class AssistantClaim(_Base):
+    text: str
+    citation_ids: list[str] = Field(default_factory=list)
+
+
+class AssistantCitation(_Base):
+    id: str
+    source_type: Literal["database", "csv", "json"]
     label: str
     detail: str
+    table: Optional[str] = None
+    record_ids: list[int] = Field(default_factory=list)
+    source_file: Optional[str] = None
+    row_start: Optional[int] = None
+    row_end: Optional[int] = None
 
 
 class AssistantChatResponse(_Base):
     client_id: int
     client_name: str
-    summary: str
-    insights: list[str] = Field(default_factory=list)
-    suggestions: list[str] = Field(default_factory=list)
-    sources: list[AssistantDataSource] = Field(default_factory=list)
-    disclaimer: str
+    summary: AssistantClaim
+    insights: list[AssistantClaim] = Field(default_factory=list)
+    suggestions: list[AssistantClaim] = Field(default_factory=list)
+    citations: list[AssistantCitation] = Field(default_factory=list)
 
 
 # ---------- Misc ----------

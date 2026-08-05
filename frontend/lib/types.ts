@@ -135,19 +135,30 @@ export interface AssistantHistoryMessage {
   content: string;
 }
 
-export interface AssistantDataSource {
+export interface AssistantClaim {
+  text: string;
+  citation_ids: string[];
+}
+
+export interface AssistantCitation {
+  id: string;
+  source_type: "database" | "csv" | "json";
   label: string;
   detail: string;
+  table: string | null;
+  record_ids: number[];
+  source_file: string | null;
+  row_start: number | null;
+  row_end: number | null;
 }
 
 export interface AssistantChatResponse {
   client_id: number;
   client_name: string;
-  summary: string;
-  insights: string[];
-  suggestions: string[];
-  sources: AssistantDataSource[];
-  disclaimer: string;
+  summary: AssistantClaim;
+  insights: AssistantClaim[];
+  suggestions: AssistantClaim[];
+  citations: AssistantCitation[];
 }
 
 export interface WsMessage {
