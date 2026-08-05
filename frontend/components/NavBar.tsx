@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   AlertTriangle,
+  Bot,
   Briefcase,
   ChevronDown,
   LineChart,
@@ -26,6 +27,7 @@ const NAV = [
   { href: "/portfolio", label: "Portfolio", icon: Briefcase },
   { href: "/trade-entry", label: "Trade Entry", icon: PlusCircle },
   { href: "/paper-trading", label: "Paper Trading", icon: Sparkles },
+  { href: "/assistant", label: "AI Assistant", icon: Bot },
   { href: "/charts", label: "Charts", icon: CandlestickChart },
 ];
 
