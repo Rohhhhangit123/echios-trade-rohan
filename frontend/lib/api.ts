@@ -105,12 +105,15 @@ async function request<T>(
 }
 
 import type {
+  AssistantChatResponse,
+  AssistantHistoryMessage,
   GenaiExplainExceptionResponse,
   GenaiParseOrderResponse,
   LoginRequest,
   PortfolioSummary,
   RegisterRequest,
   TokenResponse,
+  Tick,
   Trade,
   TradeException,
   TradeListResponse,
@@ -228,4 +231,19 @@ export const api = {
       `/genai/explain-exception/${exceptionId}`,
       { method: "POST", body: "{}" },
     ),
+
+  assistantChat: (message: string, history: AssistantHistoryMessage[]) =>
+    request<AssistantChatResponse>("/genai/assistant", {
+      method: "POST",
+      body: JSON.stringify({ message, history }),
+    }),
+  getTick: (symbol: string) =>
+    request<Tick>(`/market/tick?symbol=${encodeURIComponent(symbol)}`),
+
+  getCandles: (symbol: string, count = 200) =>
+  request<{ symbol: string; candles: Tick[] }>(
+    `/market/candles?symbol=${encodeURIComponent(symbol)}&count=${count}`,
+  ),
+ 
 };
+

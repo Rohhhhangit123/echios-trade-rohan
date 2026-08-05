@@ -166,6 +166,42 @@ class GenaiExplainExceptionResponse(_Base):
     raw: Optional[str] = None
 
 
+class AssistantHistoryMessage(_Base):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., min_length=1, max_length=4000)
+
+
+class AssistantChatRequest(_Base):
+    message: str = Field(..., min_length=2, max_length=2000)
+    history: list[AssistantHistoryMessage] = Field(default_factory=list, max_length=8)
+
+
+class AssistantClaim(_Base):
+    text: str
+    citation_ids: list[str] = Field(default_factory=list)
+
+
+class AssistantCitation(_Base):
+    id: str
+    source_type: Literal["database", "csv", "json"]
+    label: str
+    detail: str
+    table: Optional[str] = None
+    record_ids: list[int] = Field(default_factory=list)
+    source_file: Optional[str] = None
+    row_start: Optional[int] = None
+    row_end: Optional[int] = None
+
+
+class AssistantChatResponse(_Base):
+    client_id: int
+    client_name: str
+    summary: AssistantClaim
+    insights: list[AssistantClaim] = Field(default_factory=list)
+    suggestions: list[AssistantClaim] = Field(default_factory=list)
+    citations: list[AssistantCitation] = Field(default_factory=list)
+
+
 # ---------- Misc ----------
 
 class HealthResponse(_Base):

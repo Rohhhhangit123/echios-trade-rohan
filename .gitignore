@@ -2,10 +2,12 @@
 backend/.venv/
 __pycache__/
 *.pyc
+server.*.log
 
 .env
 backend/.env
 backend/venv/
+backend/.cache/
 
 # SQLite local dev database
 *.db
@@ -20,3 +22,8 @@ build/
 
 # Mac
 .DS_Store
+
+echios_local.db-shm
+*.db-wal
+*.db-shm
+*.db-journal

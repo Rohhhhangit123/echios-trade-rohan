@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   AlertTriangle,
+  Bot,
   Briefcase,
   Check,
   ChevronDown,
@@ -16,10 +17,12 @@ import {
   ShieldCheck,
   Sparkles,
   User as UserIcon,
+  CandlestickChart,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import type { UserRole } from "@/lib/types";
 import { ROLE_DISPLAY_NAME, ROLE_HOME, navItemsForRole } from "@/lib/personas";
+
 
 const SWITCHABLE_ROLES: UserRole[] = ["ADMIN", "TRADER", "COMPLIANCE", "VIEWER"];
 
@@ -29,6 +32,8 @@ const NAV_ICONS: Record<string, typeof Activity> = {
   "/portfolio": Briefcase,
   "/trade-entry": PlusCircle,
   "/paper-trading": Sparkles,
+   "/assistant": Bot,
+    "/charts": CandlestickChart,
 };
 
 const ROLE_STYLES: Record<UserRole, string> = {

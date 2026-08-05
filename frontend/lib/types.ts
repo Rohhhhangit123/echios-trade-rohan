@@ -130,7 +130,38 @@ export interface GenaiExplainExceptionResponse {
   raw: string | null;
 }
 
+export interface AssistantHistoryMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface AssistantClaim {
+  text: string;
+  citation_ids: string[];
+}
+
+export interface AssistantCitation {
+  id: string;
+  source_type: "database" | "csv" | "json";
+  label: string;
+  detail: string;
+  table: string | null;
+  record_ids: number[];
+  source_file: string | null;
+  row_start: number | null;
+  row_end: number | null;
+}
+
+export interface AssistantChatResponse {
+  client_id: number;
+  client_name: string;
+  summary: AssistantClaim;
+  insights: AssistantClaim[];
+  suggestions: AssistantClaim[];
+  citations: AssistantCitation[];
+}
 export type UserRole = "ADMIN" | "TRADER" | "COMPLIANCE" | "VIEWER";
+
 
 export interface User {
   id: number;
@@ -178,3 +209,17 @@ export interface WsMessage {
   reason?: string;
   breaking_field?: string | null;
 }
+
+export type Tick = {
+  symbol: string;
+  timestamp: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  mid: number;
+  bid: number;
+  ask: number;
+  spread: number;
+};
