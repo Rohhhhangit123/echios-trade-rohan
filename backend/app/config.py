@@ -9,9 +9,6 @@ DEFAULT_VECTOR_INDEX = Path(__file__).resolve().parent.parent / ".cache" / "simu
 
 
 class Settings(BaseSettings):
-    database_url: str = ""
-    force_sqlite: bool = True
-    use_sqlite_fallback: bool = True
     sqlite_database_url: str = "sqlite+aiosqlite:///./backend/echios_local.db"
     jwt_secret: str = "dev-only-change-me-in-prod-please-1234567890abcdef"
     jwt_algorithm: str = "HS256"
@@ -32,7 +29,7 @@ class Settings(BaseSettings):
     assistant_embedding_model: str = "BAAI/bge-small-en-v1.5"
     assistant_vector_index_path: Path = DEFAULT_VECTOR_INDEX
     assistant_semantic_result_limit: int = 8
-    assistant_user_data_source_label: str = "Supabase database"
+    assistant_user_data_source_label: str = "SQLite database"
 
     model_config = SettingsConfigDict(env_file=ENV_FILE, env_file_encoding="utf-8", extra="ignore")
 

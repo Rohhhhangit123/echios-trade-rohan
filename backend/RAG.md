@@ -23,7 +23,9 @@ Build or refresh the index from the `backend` directory:
 .\venv\Scripts\python.exe -m scripts.build_market_vector_index
 ```
 
-The model downloads on first use and is cached under `backend/.cache/models`.
+The default embedding model is bundled under `backend/models`, so setup does not require a model
+download. A different configured model downloads on first use and is cached under
+`backend/.cache/models`.
 
 ## User data and SQLite migration
 
