@@ -93,6 +93,16 @@ EXPLAIN_EXCEPTION_SYSTEM = (
     "Keep total under 200 words. Be concrete, actionable, specific to the data."
 )
 
+RISK_DAILY_SUMMARY_SYSTEM = (
+    "You are a senior risk operations analyst writing a short daily briefing for a "
+    "trading desk's Head of Risk. You are given real aggregated numbers from the "
+    "firm's STP (straight-through processing) pipeline. Write 3-5 sentences, plain "
+    "prose (no headers, no bullet points), covering: how the day is going overall, "
+    "the single biggest problem area, and one concrete recommended action. Be "
+    "specific and reference the actual numbers given. Do not invent numbers or "
+    "facts not present in the data. Do not add a greeting or sign-off."
+)
+
 
 class GenaiNotConfiguredError(RuntimeError):
     pass
@@ -180,3 +190,30 @@ async def explain_exception(exc: TradeException) -> dict:
         sections["summary"] = raw[:200]
     sections["raw"] = raw
     return sections
+
+
+async def risk_daily_summary(control_tower: dict) -> str:
+    prov = _provider()
+    stages = control_tower.get("top_failing_stages") or []
+    clients = control_tower.get("top_failing_clients") or []
+    stage_lines = ", ".join(f"{s['stage']}={s['count']}" for s in stages) or "none open"
+    client_lines = (
+        ", ".join(f"{c.get('client_name') or c['client_id']}={c['count']}" for c in clients)
+        or "none"
+    )
+    context = (
+        f"STP rate: {control_tower['stp_rate']}% ({control_tower['done_trades']}/"
+        f"{control_tower['total_trades']} trades completed cleanly)\n"
+        f"Open exceptions: {control_tower['open_exceptions']}\n"
+        f"Exception rate: {control_tower['exception_rate']}%\n"
+        f"Average resolution time: {control_tower['avg_resolution_minutes']} minutes\n"
+        f"Exceptions raised today: {control_tower['exceptions_today']} "
+        f"(yesterday: {control_tower['exceptions_yesterday']})\n"
+        f"Top failing stages (open exceptions by stage): {stage_lines}\n"
+        f"Top clients by open exceptions: {client_lines}\n"
+    )
+    raw = await prov.chat(
+        system=RISK_DAILY_SUMMARY_SYSTEM, user=context,
+        max_tokens=350, temperature=0.2,
+    )
+    return raw.strip()

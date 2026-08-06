@@ -10,7 +10,7 @@ import app.db as db_module
 from app.config import get_settings
 from app.db import init_db
 from app.pipeline import set_broadcast_hook
-from app.routers import auth, exceptions, genai, paper_trading, portfolio, trades, websocket
+from app.routers import analytics, auth, exceptions, genai, paper_trading, portfolio, trades, websocket
 from app.routers.auth import seed_default_admin_if_needed
 from app.schemas import HealthResponse
 from app.websocket_manager import ws_manager
@@ -64,6 +64,7 @@ app.include_router(exceptions.router, prefix="/api")
 app.include_router(portfolio.router, prefix="/api")
 app.include_router(paper_trading.router, prefix="/api")
 app.include_router(genai.router, prefix="/api")
+app.include_router(analytics.router, prefix="/api")
 
 app.include_router(websocket.router)  # no /api prefix for WS endpoint
 app.include_router(market.router, prefix="/api")

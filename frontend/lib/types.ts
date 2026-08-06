@@ -107,6 +107,56 @@ export interface PortfolioSummary {
   nostro_balance: string;
 }
 
+export interface HoldingConcentration {
+  instrument: string;
+  market_value: string;
+  weight_pct: string;
+  unrealized_pnl: string;
+}
+
+export interface ClientConcentration {
+  client_id: number;
+  client_name: string | null;
+  market_value: string;
+  weight_pct: string;
+  position_count: number;
+}
+
+export interface InstrumentExposure {
+  instrument: string;
+  entity: string | null;
+  currency: string | null;
+  net_quantity: string;
+  market_value: string;
+  weight_pct: string;
+  client_count: number;
+}
+
+export interface PortfolioRiskResponse {
+  client_id: number;
+  client_name: string | null;
+  total_market_value: string;
+  total_unrealized_pnl: string;
+  total_unrealized_pnl_pct: string;
+  position_count: number;
+  top_holdings: HoldingConcentration[];
+  herfindahl_index: number;
+  top1_weight_pct: string;
+  top5_weight_pct: string;
+  currency_exposure: Record<string, string>;
+}
+
+export interface FirmRiskResponse {
+  total_market_value: string;
+  total_unrealized_pnl: string;
+  client_count: number;
+  instrument_count: number;
+  client_concentration: ClientConcentration[];
+  herfindahl_index: number;
+  top_instrument_exposure: InstrumentExposure[];
+  currency_exposure: Record<string, string>;
+}
+
 export interface ParsedOrder {
   instrument: string | null;
   side: Side | null;
@@ -208,6 +258,45 @@ export interface WsMessage {
   stage?: TradeStatus;
   reason?: string;
   breaking_field?: string | null;
+}
+
+export interface StageFailureCount {
+  stage: TradeStatus;
+  count: number;
+}
+
+export interface ClientFailureCount {
+  client_id: number;
+  client_name: string | null;
+  count: number;
+}
+
+export interface ControlTowerResponse {
+  total_trades: number;
+  done_trades: number;
+  stp_rate: number;
+  open_exceptions: number;
+  exception_rate: number;
+  avg_resolution_minutes: number;
+  top_failing_stages: StageFailureCount[];
+  top_failing_clients: ClientFailureCount[];
+  exceptions_today: number;
+  exceptions_yesterday: number;
+}
+
+export interface LiveTradeSummary {
+  id: number;
+  client_name: string | null;
+  instrument: string;
+  status: TradeStatus;
+  last_successful_stage: TradeStatus | null;
+  exception_stage: TradeStatus | null;
+  updated_at: string;
+}
+
+export interface RiskDailySummaryResponse {
+  narrative: string;
+  generated_at: string;
 }
 
 export type Tick = {

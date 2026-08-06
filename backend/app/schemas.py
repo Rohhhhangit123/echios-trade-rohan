@@ -136,6 +136,58 @@ class PortfolioSummary(_Base):
     nostro_balance: Decimal = Decimal("0")
 
 
+# ---------- Portfolio risk (concentration / exposure, real-data only) ----------
+
+class HoldingConcentration(_Base):
+    instrument: str
+    market_value: Decimal
+    weight_pct: Decimal
+    unrealized_pnl: Decimal
+
+
+class ClientConcentration(_Base):
+    client_id: int
+    client_name: Optional[str] = None
+    market_value: Decimal
+    weight_pct: Decimal
+    position_count: int
+
+
+class InstrumentExposure(_Base):
+    instrument: str
+    entity: Optional[str] = None
+    currency: Optional[str] = None
+    net_quantity: Decimal
+    market_value: Decimal
+    weight_pct: Decimal
+    client_count: int
+
+
+class PortfolioRiskResponse(_Base):
+    client_id: int
+    client_name: Optional[str] = None
+    total_market_value: Decimal = Decimal("0")
+    total_unrealized_pnl: Decimal = Decimal("0")
+    total_unrealized_pnl_pct: Decimal = Decimal("0")
+    position_count: int = 0
+    top_holdings: list[HoldingConcentration] = []
+    herfindahl_index: float = 0.0
+    top1_weight_pct: Decimal = Decimal("0")
+    top5_weight_pct: Decimal = Decimal("0")
+    currency_exposure: dict[str, Decimal] = {}
+
+
+class FirmRiskResponse(_Base):
+    total_market_value: Decimal = Decimal("0")
+    total_unrealized_pnl: Decimal = Decimal("0")
+    client_count: int = 0
+    instrument_count: int = 0
+    client_concentration: list[ClientConcentration] = []
+    herfindahl_index: float = 0.0
+    top_instrument_exposure: list[InstrumentExposure] = []
+    currency_exposure: dict[str, Decimal] = {}
+
+
 # ---------- GenAI ----------
 
 class GenaiParseOrderRequest(_Base):
@@ -200,6 +252,47 @@ class AssistantChatResponse(_Base):
     insights: list[AssistantClaim] = Field(default_factory=list)
     suggestions: list[AssistantClaim] = Field(default_factory=list)
     citations: list[AssistantCitation] = Field(default_factory=list)
+
+
+# ---------- Analytics / Risk (Control Tower + Digital Twin) ----------
+
+class StageFailureCount(_Base):
+    stage: TradeStatus
+    count: int
+
+
+class ClientFailureCount(_Base):
+    client_id: int
+    client_name: Optional[str] = None
+    count: int
+
+
+class ControlTowerResponse(_Base):
+    total_trades: int
+    done_trades: int
+    stp_rate: float
+    open_exceptions: int
+    exception_rate: float
+    avg_resolution_minutes: float
+    top_failing_stages: list[StageFailureCount] = []
+    top_failing_clients: list[ClientFailureCount] = []
+    exceptions_today: int
+    exceptions_yesterday: int
+
+
+class LiveTradeSummary(_Base):
+    id: int
+    client_name: Optional[str] = None
+    instrument: str
+    status: TradeStatus
+    last_successful_stage: Optional[TradeStatus] = None
+    exception_stage: Optional[TradeStatus] = None
+    updated_at: datetime
+
+
+class RiskDailySummaryResponse(_Base):
+    narrative: str
+    generated_at: datetime
 
 
 # ---------- Misc ----------

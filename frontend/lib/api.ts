@@ -107,11 +107,16 @@ async function request<T>(
 import type {
   AssistantChatResponse,
   AssistantHistoryMessage,
+  ControlTowerResponse,
+  FirmRiskResponse,
   GenaiExplainExceptionResponse,
   GenaiParseOrderResponse,
+  LiveTradeSummary,
   LoginRequest,
+  PortfolioRiskResponse,
   PortfolioSummary,
   RegisterRequest,
+  RiskDailySummaryResponse,
   TokenResponse,
   Tick,
   Trade,
@@ -220,6 +225,11 @@ export const api = {
   getPortfolio: (clientId: number) =>
     request<PortfolioSummary>(`/portfolio/${clientId}`),
 
+  getPortfolioRisk: (clientId: number) =>
+    request<PortfolioRiskResponse>(`/portfolio/${clientId}/risk`),
+
+  getFirmRisk: () => request<FirmRiskResponse>("/portfolio/risk/firm"),
+
   genaiParseOrder: (prompt: string, default_client_id?: number) =>
     request<GenaiParseOrderResponse>("/genai/parse-order", {
       method: "POST",
@@ -244,6 +254,16 @@ export const api = {
   request<{ symbol: string; candles: Tick[] }>(
     `/market/candles?symbol=${encodeURIComponent(symbol)}&count=${count}`,
   ),
- 
+
+  getControlTower: () => request<ControlTowerResponse>("/analytics/control-tower"),
+
+  getLiveTrades: (limit = 100) =>
+    request<LiveTradeSummary[]>(`/analytics/live-trades?limit=${limit}`),
+
+  genaiRiskDailySummary: () =>
+    request<RiskDailySummaryResponse>("/genai/risk-daily-summary", {
+      method: "POST",
+      body: "{}",
+    }),
 };
 

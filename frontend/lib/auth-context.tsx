@@ -54,10 +54,14 @@ function isPublicPath(pathname: string): boolean {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [realUser, setRealUser] = useState<User | null>(() => getStoredUser());
-  const [isLoading, setIsLoading] = useState<boolean>(() => !!getStoredToken());
+  // Start with server-safe defaults (null/false) on every render so the first
+  // client render matches SSR output exactly — localStorage/sessionStorage
+  // values are only read after mount, in the effect below, to avoid a
+  // hydration mismatch between server HTML and the client's first paint.
+  const [realUser, setRealUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewRole, setViewRoleState] = useState<UserRole | null>(() => getStoredViewRole());
+  const [viewRole, setViewRoleState] = useState<UserRole | null>(null);
 
   const isAuthenticated = !!realUser;
 
@@ -106,10 +110,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Runs once after mount, so the first client render matches SSR output
+    // (both start from the null/false defaults above) before any
+    // localStorage/sessionStorage value is applied.
+    setViewRoleState(getStoredViewRole());
+    const stored = getStoredUser();
+    if (stored) setRealUser(stored);
     if (getStoredToken()) {
       void refreshUser();
+    } else {
+      setIsLoading(false);
     }
-  }, [refreshUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = useCallback(
     async (email: string, password: string): Promise<User> => {

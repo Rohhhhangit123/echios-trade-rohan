@@ -11,8 +11,10 @@ import {
   Briefcase,
   Check,
   ChevronDown,
+  Gauge,
   LineChart,
   LogOut,
+  PieChart,
   PlusCircle,
   ShieldCheck,
   Sparkles,
@@ -28,8 +30,10 @@ const SWITCHABLE_ROLES: UserRole[] = ["ADMIN", "TRADER", "COMPLIANCE", "VIEWER"]
 
 const NAV_ICONS: Record<string, typeof Activity> = {
   "/dashboard": Activity,
+  "/risk": Gauge,
   "/exceptions": AlertTriangle,
   "/portfolio": Briefcase,
+  "/portfolio/risk": PieChart,
   "/trade-entry": PlusCircle,
   "/paper-trading": Sparkles,
    "/assistant": Bot,
