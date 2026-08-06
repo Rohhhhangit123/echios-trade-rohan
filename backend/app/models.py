@@ -238,8 +238,8 @@ class LedgerEntry(Base):
 class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
     TRADER = "TRADER"
-    COMPLIANCE = "COMPLIANCE"
-    VIEWER = "VIEWER"
+    RISK = "RISK"
+    ASSET = "ASSET"
 
 
 class User(Base):
@@ -249,7 +249,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole, name="user_role_enum"), nullable=False, default=UserRole.VIEWER, index=True)
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole, name="user_role_enum"), nullable=False, default=UserRole.ASSET, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())

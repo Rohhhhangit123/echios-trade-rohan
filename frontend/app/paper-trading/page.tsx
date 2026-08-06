@@ -18,10 +18,7 @@ export default function PaperTradingPage() {
             Paper trading environment
           </h2>
           <p className="mt-0.5 text-xs text-slate-300/90">
-            Same 11-stage pipeline, but{" "}
-            <span className="font-mono font-semibold text-violet-200">simulated=True</span>{" "}
-            — skips real nostro/depot funding checks. Use this to test the full UI flow without
-            impacting the production ledger.
+     
           </p>
         </div>
       </div>

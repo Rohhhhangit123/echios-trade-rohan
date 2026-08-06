@@ -75,31 +75,31 @@ export default function StageProgress({
                 )}
                 <div
                   className={clsx(
-                    "relative z-10 flex items-center justify-center rounded-full border-2 transition-all",
+                    "relative z-10 flex items-center justify-center rounded-full border transition-all duration-300",
                     nodeSize,
                     isCompleted &&
                       !isExceptionHere &&
-                      "border-emerald-500 bg-emerald-500/15 text-emerald-400",
+                      "border-emerald-500/80 bg-emerald-500/20 text-emerald-300 glow-emerald",
                     isCurrent &&
                       !isExceptionHere &&
-                      "border-indigo-400 bg-indigo-500/20 text-indigo-300 shadow-[0_0_0_3px_rgba(99,102,241,0.18)] animate-pulse-soft",
+                      "border-indigo-400 bg-indigo-500/25 text-indigo-200 glow-indigo animate-pulse-soft ring-4 ring-indigo-500/20",
                     !isCompleted &&
                       !isCurrent &&
                       !isExceptionHere &&
-                      "border-slate-600 bg-slate-900 text-slate-500",
+                      "border-slate-800 bg-slate-900/80 text-slate-600",
                     isExceptionHere &&
-                      "border-rose-500 bg-rose-500/15 text-rose-400 shadow-[0_0_0_3px_rgba(244,63,94,0.18)]",
+                      "border-rose-500/90 bg-rose-500/25 text-rose-300 glow-rose ring-4 ring-rose-500/20",
                   )}
                   title={label}
                 >
                   {isCompleted && !isExceptionHere ? (
-                    <Check className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />
+                    <Check className={size === "sm" ? "h-3 w-3 stroke-[2.5]" : "h-4 w-4 stroke-[2.5]"} />
                   ) : isExceptionHere ? (
                     <AlertTriangle className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />
                   ) : isCurrent ? (
                     <Dot className={size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5"} />
                   ) : (
-                    <Circle className={size === "sm" ? "h-2.5 w-2.5" : "h-3.5 w-3.5"} strokeWidth={2.5} />
+                    <Circle className={size === "sm" ? "h-2 w-2" : "h-2.5 w-2.5"} />
                   )}
                 </div>
                 {idx < STAGE_ORDER.length - 1 && (

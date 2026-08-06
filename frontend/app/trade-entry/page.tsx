@@ -10,8 +10,7 @@ export default function TradeEntryPage() {
           STP Trade Entry
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Submit a trade — the 11-stage pipeline runs synchronously. Use clients
-          with bad KYC (#3 / #5) to exercise the exception path.
+
         </p>
       </header>
       <TradeEntryForm modeLabel="STP trade" accentTone="indigo" />

@@ -136,17 +136,17 @@ async def seed_default_users() -> None:
                     is_active=True,
                 ),
                 User(
-                    email="compliance@echios.local",
-                    full_name="Mike Compliance",
+                    email="risk@echios.local",
+                    full_name="Mike Risk Management",
                     hashed_password=hash_password("compliance123"),
-                    role=UserRole.COMPLIANCE,
+                    role=UserRole.RISK,
                     is_active=True,
                 ),
                 User(
-                    email="viewer@echios.local",
-                    full_name="Olivia Viewer",
+                    email="asset@echios.local",
+                    full_name="Olivia Asset Manager",
                     hashed_password=hash_password("viewer123"),
-                    role=UserRole.VIEWER,
+                    role=UserRole.ASSET,
                     is_active=True,
                 ),
             ]

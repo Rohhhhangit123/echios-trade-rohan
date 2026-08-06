@@ -332,7 +332,7 @@ class RegisterRequest(_Base):
     email: EmailLike
     password: str = Field(min_length=6, max_length=128)
     full_name: str = Field(min_length=1, max_length=255)
-    role: UserRole = UserRole.VIEWER
+    role: UserRole = UserRole.ASSET
 
 
 class UserResponse(_Base):

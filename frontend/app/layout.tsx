@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+// @ts-expect-error -- Next.js supports global CSS side-effect imports in app/layout.tsx
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -13,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-slate-950 text-slate-200 antialiased">
+    <html lang="en" className="dark">
+      <body className="min-h-screen bg-[#0d0a12] text-slate-100 antialiased selection:bg-purple-500/30 selection:text-purple-200">
         <Providers>{children}</Providers>
       </body>
     </html>

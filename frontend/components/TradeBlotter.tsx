@@ -35,41 +35,45 @@ export default function TradeBlotter({ trades, onView, highlightTradeId }: Trade
   }, [trades, filter]);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 shadow">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-900 px-4 py-3">
-        <div className="text-sm font-semibold text-slate-100">Trade Blotter</div>
-        <div className="text-xs text-slate-500">{filtered.length} trades</div>
-        <div className="w-64">
+    <div className="glass-panel overflow-hidden rounded-2xl border border-slate-800/80 shadow-2xl shadow-black/40">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-800/80 bg-slate-900/60 px-5 py-3.5 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="text-sm font-bold text-slate-100">Trade Blotter</div>
+          <div className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-400">
+            {filtered.length} trades
+          </div>
+        </div>
+        <div className="w-72">
           <input
             type="search"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            placeholder="Search id / instrument / client…"
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+            placeholder="Filter by ID, Instrument, Client…"
+            className="w-full rounded-xl border border-slate-700/70 bg-slate-950/80 px-3.5 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
           />
         </div>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-slate-900/80 text-[11px] uppercase tracking-wider text-slate-400">
+          <thead className="bg-slate-950/70 text-[11px] font-bold uppercase tracking-wider text-slate-400">
             <tr>
-              <th className="w-10 py-2.5"></th>
-              <th className="px-3 py-2.5 text-left">ID</th>
-              <th className="px-3 py-2.5 text-left">Client</th>
-              <th className="px-3 py-2.5 text-left">Inst</th>
-              <th className="px-3 py-2.5 text-left">Side</th>
-              <th className="px-3 py-2.5 text-right">Qty</th>
-              <th className="px-3 py-2.5 text-right">Price</th>
-              <th className="px-3 py-2.5 text-right">Notional</th>
-              <th className="px-3 py-2.5 text-left">Ccy</th>
-              <th className="px-3 py-2.5 text-left">Mode</th>
-              <th className="px-3 py-2.5 text-left">Status</th>
-              <th className="px-3 py-2.5 text-right">Excs</th>
-              <th className="px-3 py-2.5 text-right"></th>
+              <th className="w-10 py-3"></th>
+              <th className="px-3 py-3 text-left">ID</th>
+              <th className="px-3 py-3 text-left">Client</th>
+              <th className="px-3 py-3 text-left">Inst</th>
+              <th className="px-3 py-3 text-left">Side</th>
+              <th className="px-3 py-3 text-right">Qty</th>
+              <th className="px-3 py-3 text-right">Price</th>
+              <th className="px-3 py-3 text-right">Notional</th>
+              <th className="px-3 py-3 text-left">Ccy</th>
+              <th className="px-3 py-3 text-left">Mode</th>
+              <th className="px-3 py-3 text-left">Status</th>
+              <th className="px-3 py-3 text-right">Excs</th>
+              <th className="px-3 py-3 text-right"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/70">
+          <tbody className="divide-y divide-slate-800/50">
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={13} className="px-4 py-16 text-center text-xs text-slate-500">
@@ -227,28 +231,27 @@ export default function TradeBlotter({ trades, onView, highlightTradeId }: Trade
 }
 
 function StatusPill({ status }: { status: Trade["status"] }) {
-  const cfg: Record<string, string> = {
-    ONBOARDED: "bg-sky-500/15 text-sky-300 ring-sky-500/30",
-    EXECUTED: "bg-sky-500/15 text-sky-300 ring-sky-500/30",
-    CAPTURED: "bg-cyan-500/15 text-cyan-300 ring-cyan-500/30",
-    ENRICHED: "bg-cyan-500/15 text-cyan-300 ring-cyan-500/30",
-    ALLOCATED: "bg-teal-500/15 text-teal-300 ring-teal-500/30",
-    VALIDATED: "bg-teal-500/15 text-teal-300 ring-teal-500/30",
-    CONFIRMED: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30",
-    FUNDED: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30",
-    SETTLED: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30",
-    RECONCILED: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30",
-    DONE: "bg-emerald-600/25 text-emerald-100 ring-emerald-500/40",
-    EXCEPTION: "bg-rose-500/20 text-rose-200 ring-rose-500/40",
-  };
+  const isDone = status === "DONE";
+  const isException = status === "EXCEPTION";
+
   return (
     <span
       className={clsx(
-        "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ring-1 ring-inset",
-        cfg[status] ?? "bg-slate-700 text-slate-200 ring-slate-600",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide border",
+        isDone
+          ? "pill-filled"
+          : isException
+            ? "pill-rejected"
+            : "pill-routed",
       )}
     >
-      {status}
+      <span
+        className={clsx(
+          "h-1.5 w-1.5 rounded-full",
+          isDone ? "bg-emerald-400" : isException ? "bg-rose-400" : "bg-blue-400 animate-pulse",
+        )}
+      />
+      {status === "DONE" ? "Filled" : status === "EXCEPTION" ? "Exception" : status}
     </span>
   );
 }

@@ -18,12 +18,12 @@ export const ALL_PAGES: NavItemDef[] = [
 ];
 
 // Display label per role — kept separate from the backend UserRole enum value
-// (ADMIN/TRADER/COMPLIANCE/VIEWER) so persona naming can change without a DB migration.
+// (ADMIN/TRADER/RISK/ASSET) so persona naming can change without a DB migration.
 export const ROLE_DISPLAY_NAME: Record<UserRole, string> = {
   ADMIN: "Admin",
   TRADER: "Trader",
-  COMPLIANCE: "Risk Manager",
-  VIEWER: "Asset Manager",
+  RISK: "Risk Manager",
+  ASSET: "Asset Manager",
 };
 
 // Pages each persona is wired to see.
@@ -32,16 +32,16 @@ export const ROLE_PAGES: Record<UserRole, string[]> = {
     (href) => href !== "/risk" && href !== "/paper-trading",
   ),
   TRADER: ["/dashboard", "/trade-entry", "/paper-trading", "/charts"],
-  COMPLIANCE: ["/risk", "/exceptions", "/dashboard", "/portfolio/risk"],
-  VIEWER: ["/portfolio", "/portfolio/risk", "/assistant"],
+  RISK: ["/risk", "/exceptions", "/dashboard", "/portfolio/risk"],
+  ASSET: ["/portfolio", "/portfolio/risk", "/assistant"],
 };
 
 // Where each persona lands after login / when hitting a page they can't see.
 export const ROLE_HOME: Record<UserRole, string> = {
   ADMIN: "/dashboard",
   TRADER: "/dashboard",
-  COMPLIANCE: "/risk",
-  VIEWER: "/portfolio",
+  RISK: "/risk",
+  ASSET: "/portfolio",
 };
 
 export function navItemsForRole(role: UserRole): NavItemDef[] {

@@ -210,7 +210,7 @@ export interface AssistantChatResponse {
   suggestions: AssistantClaim[];
   citations: AssistantCitation[];
 }
-export type UserRole = "ADMIN" | "TRADER" | "COMPLIANCE" | "VIEWER";
+export type UserRole = "ADMIN" | "TRADER" | "RISK" | "ASSET";
 
 
 export interface User {

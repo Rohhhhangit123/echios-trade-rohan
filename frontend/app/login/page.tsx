@@ -33,13 +33,13 @@ const DEMO_USERS = [
     label: "STP pipeline & paper trading",
   },
   {
-    email: "compliance@echios.local",
+    email: "risk@echios.local",
     password: "compliance123",
     role: "RISK MANAGER",
     label: "Exceptions, audit & mitigation",
   },
   {
-    email: "viewer@echios.local",
+    email: "asset@echios.local",
     password: "viewer123",
     role: "ASSET MANAGER",
     label: "Portfolio & diversification",
@@ -93,42 +93,47 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200">
+    <div className="min-h-screen bg-[#090d16] text-slate-100">
       <div className="relative min-h-screen">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(99,102,241,0.18),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_rgba(236,72,153,0.12),_transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(99,102,241,0.15),_transparent_60%),radial-gradient(ellipse_at_bottom_right,_rgba(139,92,246,0.12),_transparent_60%)]"
         />
         <div className="relative mx-auto grid max-w-[1400px] grid-cols-1 gap-10 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-16">
           <section className="order-2 flex flex-col justify-center lg:order-1">
             <div className="mb-8 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/20">
-                <LineChart className="h-6 w-6 text-white" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 text-white shadow-xl shadow-indigo-500/30">
+                <LineChart className="h-6 w-6" />
               </div>
               <div className="leading-tight">
-                <div className="text-lg font-semibold tracking-tight text-white">Echios</div>
-                <div className="text-[11px] uppercase tracking-widest text-slate-500">STP Trading Platform</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-extrabold tracking-tight text-white">ECHIOS</span>
+                  <span className="rounded bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
+                    PRO
+                  </span>
+                </div>
+                <div className="text-[11px] font-medium tracking-widest text-slate-400">STP TRADING PLATFORM</div>
               </div>
             </div>
 
-            <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl leading-tight">
               Straight-through trade settlement —{" "}
-              <span className="bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-transparent">
-                with guardrails.
+              <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-sky-400 bg-clip-text text-transparent">
+                with automated guardrails.
               </span>
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
               Sign in to manage trades, monitor the 11-stage lifecycle pipeline, triage exceptions,
-              and track portfolio P&amp;L — all in one secure workspace.
+              and track portfolio P&amp;L — all in one unified, high-performance workspace.
             </p>
 
             <dl className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {FEATURES.map((f) => (
                 <div
                   key={f.title}
-                  className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 backdrop-blur"
+                  className="glass-card glass-card-hover rounded-2xl p-4 backdrop-blur-md"
                 >
-                  <dt className="flex items-center gap-2 text-sm font-medium text-white">
+                  <dt className="flex items-center gap-2 text-sm font-semibold text-white">
                     <f.icon className="h-4 w-4 text-indigo-400" />
                     {f.title}
                   </dt>
@@ -137,9 +142,9 @@ function LoginContent() {
               ))}
             </dl>
 
-            <div className="mt-10 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <div className="mt-10 flex flex-wrap items-center gap-2 text-xs text-slate-400">
               <ShieldCheck className="h-4 w-4 text-emerald-400" />
-              <span>Data stays local by default (SQLite-only). No cloud DB unless you opt in.</span>
+              <span>Enterprise Grade local execution &amp; full trade lifecycle auditing.</span>
             </div>
           </section>
 

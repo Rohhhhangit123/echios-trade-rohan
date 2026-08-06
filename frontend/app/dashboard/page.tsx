@@ -167,39 +167,37 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-400">
+            <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+            STP Operations Hub
+          </div>
+          <h1 className="mt-1 flex items-center gap-2.5 text-2xl font-black tracking-tight text-white sm:text-3xl">
             <Activity className="h-7 w-7 text-indigo-400" />
-            Ops Dashboard
+            Live Trade Operations
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Live Straight-Through Processing — 11-stage pipeline with exception-based resolution.
+          <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+            Real-time Straight-Through Processing: 11-stage automated pipeline.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <div
             className={clsx(
-              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
+              "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition-all",
               connected
-                ? "bg-emerald-500/10 text-emerald-300 ring-1 ring-inset ring-emerald-500/30"
-                : "bg-amber-500/10 text-amber-300 ring-1 ring-inset ring-amber-500/30",
+                ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 glow-emerald"
+                : "border border-amber-500/30 bg-amber-500/10 text-amber-300",
             )}
           >
-            {connected ? (
-              <Zap className="h-3.5 w-3.5" />
-            ) : (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            )}
-            WebSocket {connected ? "LIVE" : "reconnecting…"}
+            <span className={clsx("h-2 w-2 rounded-full", connected ? "bg-emerald-400 animate-ping" : "bg-amber-400")} />
+            {connected ? "LIVE WEBSOCKET" : "RECONNECTING…"}
           </div>
           <button
             onClick={refreshAll}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-xs font-semibold text-slate-200 shadow-md transition hover:border-slate-600 hover:bg-slate-800 disabled:opacity-50"
           >
-            <RefreshCw
-              className={clsx("h-3.5 w-3.5", loading && "animate-spin")}
-            />
-            Refresh
+            <RefreshCw className={clsx("h-3.5 w-3.5", loading && "animate-spin")} />
+            Sync
           </button>
         </div>
       </div>
@@ -207,13 +205,13 @@ export default function DashboardPage() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <StatCard
-          label="Total trades"
+          label="Total Trades"
           value={stats.total.toLocaleString()}
           icon={<Activity className="h-4 w-4" />}
           tone="indigo"
         />
         <StatCard
-          label="In-flight"
+          label="In-Flight"
           value={stats.inflight.toLocaleString()}
           icon={<Loader2 className="h-4 w-4 animate-spin" />}
           tone="sky"
@@ -232,7 +230,7 @@ export default function DashboardPage() {
           badgeHref="/exceptions"
         />
         <StatCard
-          label="Notional traded"
+          label="Notional Traded"
           value={
             stats.notional === 0
               ? "—"
@@ -242,7 +240,7 @@ export default function DashboardPage() {
           tone="violet"
         />
         <StatCard
-          label="Avg stage"
+          label="Avg Pipeline Stage"
           value={`${stats.avgStageIdx.toFixed(1)} / ${STAGE_COUNT}`}
           icon={<Zap className="h-4 w-4" />}
           tone="cyan"
@@ -323,68 +321,18 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* Recent open exceptions sidebar + blotter (2-col) */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="space-y-3 lg:col-span-1">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-100">
-              Open exceptions{" "}
-              <span className="ml-1 text-slate-500">({exceptions.length})</span>
-            </h2>
-            <Link
-              href="/exceptions"
-              className="text-xs text-indigo-300 hover:text-indigo-200"
-            >
-              View all →
-            </Link>
+      {/* Blotter (full width) */}
+      <div className="w-full">
+        {loading && trades.length === 0 ? (
+          <div className="flex h-64 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/40">
+            <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
+              <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
+              Loading blotter…
+            </div>
           </div>
-          {exceptions.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/30 p-8 text-center text-xs text-slate-500">
-              <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-emerald-400" />
-              All clear — no open exceptions.
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {exceptions.slice(0, 6).map((exc) => (
-                <li
-                  key={exc.id}
-                  className="group rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-xs transition hover:bg-rose-500/10"
-                >
-                  <div className="mb-1 flex flex-wrap items-center gap-2 text-[10px]">
-                    <span className="rounded bg-rose-500/20 px-1.5 py-0.5 font-mono text-rose-200">
-                      #{exc.id}
-                    </span>
-                    <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-indigo-300">
-                      {exc.stage}
-                    </span>
-                    <span className="font-semibold text-slate-200">
-                      {exc.trade_instrument ?? `Trade #${exc.trade_id}`}
-                    </span>
-                  </div>
-                  <div className="line-clamp-2 text-slate-300">{exc.reason}</div>
-                  <Link
-                    href="/exceptions"
-                    className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-rose-300 opacity-70 transition group-hover:opacity-100"
-                  >
-                    Go resolve →
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div className="lg:col-span-2">
-          {loading && trades.length === 0 ? (
-            <div className="flex h-64 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/40">
-              <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
-                <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
-                Loading blotter…
-              </div>
-            </div>
-          ) : (
-            <TradeBlotter trades={trades} highlightTradeId={flashTradeId} />
-          )}
-        </div>
+        ) : (
+          <TradeBlotter trades={trades} highlightTradeId={flashTradeId} />
+        )}
       </div>
 
       {/* Toast */}
@@ -413,33 +361,39 @@ function StatCard({
   tone: "indigo" | "sky" | "emerald" | "rose" | "violet" | "cyan" | "slate";
   badgeHref?: string;
 }) {
-  const tones: Record<string, string> = {
-    indigo: "bg-indigo-500/10 text-indigo-300 ring-indigo-500/30",
-    sky: "bg-sky-500/10 text-sky-300 ring-sky-500/30",
-    emerald: "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30",
-    rose: "bg-rose-500/10 text-rose-300 ring-rose-500/30",
-    violet: "bg-violet-500/10 text-violet-300 ring-violet-500/30",
-    cyan: "bg-cyan-500/10 text-cyan-300 ring-cyan-500/30",
-    slate: "bg-slate-500/10 text-slate-300 ring-slate-500/30",
+  const tones: Record<string, { bg: string; text: string; border: string; glow: string }> = {
+    indigo: { bg: "bg-indigo-500/10", text: "text-indigo-300", border: "border-indigo-500/30", glow: "hover:border-indigo-500/50" },
+    sky: { bg: "bg-sky-500/10", text: "text-sky-300", border: "border-sky-500/30", glow: "hover:border-sky-500/50" },
+    emerald: { bg: "bg-emerald-500/10", text: "text-emerald-300", border: "border-emerald-500/30", glow: "hover:border-emerald-500/50" },
+    rose: { bg: "bg-rose-500/10", text: "text-rose-300", border: "border-rose-500/30", glow: "hover:border-rose-500/50" },
+    violet: { bg: "bg-violet-500/10", text: "text-violet-300", border: "border-violet-500/30", glow: "hover:border-violet-500/50" },
+    cyan: { bg: "bg-cyan-500/10", text: "text-cyan-300", border: "border-cyan-500/30", glow: "hover:border-cyan-500/50" },
+    slate: { bg: "bg-slate-500/10", text: "text-slate-300", border: "border-slate-500/30", glow: "hover:border-slate-500/50" },
   };
+
+  const t = tones[tone];
+
   const content = (
     <div
       className={clsx(
-        "flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3 transition hover:bg-slate-900/80",
+        "glass-card glass-card-hover flex items-center justify-between rounded-xl px-4 py-3.5 transition-all duration-300",
+        t.glow,
       )}
     >
       <div className="min-w-0">
-        <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
           {label}
         </div>
-        <div className="mt-1 truncate text-xl font-bold tabular-nums text-white">
+        <div className="mt-1 truncate text-xl font-extrabold tabular-nums tracking-tight text-white">
           {value}
         </div>
       </div>
       <div
         className={clsx(
-          "flex h-9 w-9 flex-none items-center justify-center rounded-lg ring-1 ring-inset",
-          tones[tone],
+          "flex h-9 w-9 flex-none items-center justify-center rounded-xl border backdrop-blur-md transition-transform duration-300",
+          t.bg,
+          t.text,
+          t.border,
         )}
       >
         {icon}
