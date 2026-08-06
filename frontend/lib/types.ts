@@ -107,6 +107,56 @@ export interface PortfolioSummary {
   nostro_balance: string;
 }
 
+export interface HoldingConcentration {
+  instrument: string;
+  market_value: string;
+  weight_pct: string;
+  unrealized_pnl: string;
+}
+
+export interface ClientConcentration {
+  client_id: number;
+  client_name: string | null;
+  market_value: string;
+  weight_pct: string;
+  position_count: number;
+}
+
+export interface InstrumentExposure {
+  instrument: string;
+  entity: string | null;
+  currency: string | null;
+  net_quantity: string;
+  market_value: string;
+  weight_pct: string;
+  client_count: number;
+}
+
+export interface PortfolioRiskResponse {
+  client_id: number;
+  client_name: string | null;
+  total_market_value: string;
+  total_unrealized_pnl: string;
+  total_unrealized_pnl_pct: string;
+  position_count: number;
+  top_holdings: HoldingConcentration[];
+  herfindahl_index: number;
+  top1_weight_pct: string;
+  top5_weight_pct: string;
+  currency_exposure: Record<string, string>;
+}
+
+export interface FirmRiskResponse {
+  total_market_value: string;
+  total_unrealized_pnl: string;
+  client_count: number;
+  instrument_count: number;
+  client_concentration: ClientConcentration[];
+  herfindahl_index: number;
+  top_instrument_exposure: InstrumentExposure[];
+  currency_exposure: Record<string, string>;
+}
+
 export interface ParsedOrder {
   instrument: string | null;
   side: Side | null;

@@ -10,6 +10,7 @@ export const ALL_PAGES: NavItemDef[] = [
   { href: "/risk", label: "Risk Control Tower" },
   { href: "/exceptions", label: "Exceptions" },
   { href: "/portfolio", label: "Portfolio" },
+  { href: "/portfolio/risk", label: "Portfolio Risk" },
   { href: "/trade-entry", label: "Trade Entry" },
   { href: "/paper-trading", label: "Paper Trading" },
   { href: "/charts", label: "Charts" },
@@ -31,8 +32,8 @@ export const ROLE_PAGES: Record<UserRole, string[]> = {
     (href) => href !== "/risk" && href !== "/paper-trading",
   ),
   TRADER: ["/dashboard", "/trade-entry", "/paper-trading", "/charts"],
-  COMPLIANCE: ["/risk", "/exceptions", "/dashboard"],
-  VIEWER: ["/portfolio", "/assistant"],
+  COMPLIANCE: ["/risk", "/exceptions", "/dashboard", "/portfolio/risk"],
+  VIEWER: ["/portfolio", "/portfolio/risk", "/assistant"],
 };
 
 // Where each persona lands after login / when hitting a page they can't see.

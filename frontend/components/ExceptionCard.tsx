@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { TradeException, GenaiExplainExceptionResponse } from "@/lib/types";
 import { api } from "@/lib/api";
+import TradeReplay from "@/components/TradeReplay";
 
 interface ExceptionCardProps {
   exc: TradeException;
@@ -155,6 +156,8 @@ export default function ExceptionCard({ exc, onResolved }: ExceptionCardProps) {
 
         {open ? (
           <div className="mt-4 space-y-3">
+            <TradeReplay tradeId={exc.trade_id} />
+
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleExplain}
@@ -221,22 +224,25 @@ export default function ExceptionCard({ exc, onResolved }: ExceptionCardProps) {
             </div>
           </div>
         ) : (
-          exc.resolution_note && (
-            <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Resolution
+          <div className="mt-4 space-y-3">
+            {exc.resolution_note && (
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Resolution
+                  </div>
+                  {exc.resolved_at && (
+                    <span className="text-[11px] text-emerald-400/70">
+                      {timeAgo(exc.resolved_at)}
+                    </span>
+                  )}
                 </div>
-                {exc.resolved_at && (
-                  <span className="text-[11px] text-emerald-400/70">
-                    {timeAgo(exc.resolved_at)}
-                  </span>
-                )}
+                <p className="mt-1.5 text-sm text-slate-200">{exc.resolution_note}</p>
               </div>
-              <p className="mt-1.5 text-sm text-slate-200">{exc.resolution_note}</p>
-            </div>
-          )
+            )}
+            <TradeReplay tradeId={exc.trade_id} />
+          </div>
         )}
       </div>
     </div>

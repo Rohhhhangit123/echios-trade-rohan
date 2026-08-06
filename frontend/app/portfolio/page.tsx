@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Briefcase, ChevronDown, ChevronUp, RefreshCw, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import Link from "next/link";
+import { Briefcase, ChevronDown, ChevronUp, PieChart, RefreshCw, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import clsx from "clsx";
 
 import { api } from "@/lib/api";
@@ -112,6 +113,13 @@ export default function PortfolioPage() {
               ))}
             </select>
           </div>
+          <Link
+            href="/portfolio/risk"
+            className="inline-flex items-center gap-1.5 rounded-md border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-200 hover:bg-violet-500/20"
+          >
+            <PieChart className="h-3.5 w-3.5" />
+            Risk view
+          </Link>
           <button
             onClick={load}
             disabled={loading}

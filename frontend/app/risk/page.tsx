@@ -1,28 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import {
   AlertTriangle,
+  ArrowRight,
+  Crown,
   Gauge,
   Loader2,
   RefreshCw,
   Sparkles,
-  TrendingDown,
   TrendingUp,
-  Users,
+  Waypoints,
   Zap,
 } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { useTradeWebSocket } from "@/lib/websocket";
-import type { ControlTowerResponse, LiveTradeSummary, TradeStatus } from "@/lib/types";
+import type { ControlTowerResponse, TradeStatus } from "@/lib/types";
 import { STAGE_LABELS } from "@/components/StageProgress";
 
 export default function RiskControlTowerPage() {
   const [tower, setTower] = useState<ControlTowerResponse | null>(null);
-  const [liveTrades, setLiveTrades] = useState<LiveTradeSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,12 +36,7 @@ export default function RiskControlTowerPage() {
     setLoading(true);
     setError(null);
     try {
-      const [t, lt] = await Promise.all([
-        api.getControlTower(),
-        api.getLiveTrades(60),
-      ]);
-      setTower(t);
-      setLiveTrades(lt);
+      setTower(await api.getControlTower());
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -53,7 +48,7 @@ export default function RiskControlTowerPage() {
     refresh();
   }, [refresh]);
 
-  // Live grid + headline numbers refresh whenever the pipeline broadcasts a change.
+  // Headline numbers refresh whenever the pipeline broadcasts a change.
   useEffect(() => {
     if (!lastMessage) return;
     if (
@@ -78,16 +73,11 @@ export default function RiskControlTowerPage() {
     }
   }, []);
 
-  const exceptionsTrend = useMemo(() => {
-    if (!tower) return null;
-    const { exceptions_today, exceptions_yesterday } = tower;
-    if (exceptions_yesterday === 0) return null;
-    const pct = ((exceptions_today - exceptions_yesterday) / exceptions_yesterday) * 100;
-    return pct;
-  }, [tower]);
+  const topStage = tower?.top_failing_stages[0];
+  const topClient = tower?.top_failing_clients[0];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
@@ -108,7 +98,7 @@ export default function RiskControlTowerPage() {
             )}
           >
             {connected ? <Zap className="h-3.5 w-3.5" /> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            WebSocket {connected ? "LIVE" : "reconnecting…"}
+            {connected ? "Live" : "Reconnecting…"}
           </div>
           <button
             onClick={refresh}
@@ -127,73 +117,57 @@ export default function RiskControlTowerPage() {
         </div>
       )}
 
-      {/* Control Tower stat grid */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-        <StatCard
+      {/* Hero KPIs — the four numbers a risk manager checks first, given real weight */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <HeroStat
           label="STP rate"
           value={tower ? `${tower.stp_rate.toFixed(1)}%` : "—"}
-          icon={<TrendingUp className="h-4 w-4" />}
-          tone={tower && tower.stp_rate >= 90 ? "emerald" : tower && tower.stp_rate >= 70 ? "amber" : "rose"}
+          caption={tower ? `${tower.done_trades} of ${tower.total_trades} trades clean` : undefined}
+          good={!!tower && tower.stp_rate >= 90}
+          warn={!!tower && tower.stp_rate < 90 && tower.stp_rate >= 70}
+          bad={!!tower && tower.stp_rate < 70}
+          icon={<TrendingUp className="h-5 w-5" />}
         />
-        <StatCard
+        <HeroStat
           label="Open exceptions"
           value={tower ? tower.open_exceptions.toLocaleString() : "—"}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          tone={tower && tower.open_exceptions > 0 ? "rose" : "slate"}
+          caption={tower ? `${tower.exception_rate.toFixed(1)}% of all trades` : undefined}
+          good={!!tower && tower.open_exceptions === 0}
+          warn={!!tower && tower.open_exceptions > 0 && tower.open_exceptions <= 3}
+          bad={!!tower && tower.open_exceptions > 3}
+          icon={<AlertTriangle className="h-5 w-5" />}
           href="/exceptions"
         />
-        <StatCard
-          label="Exception rate"
-          value={tower ? `${tower.exception_rate.toFixed(1)}%` : "—"}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          tone={tower && tower.exception_rate > 20 ? "rose" : "amber"}
+        <HeroStat
+          label="Top-failing stage"
+          value={topStage ? STAGE_LABELS[topStage.stage as TradeStatus] ?? topStage.stage : "None"}
+          caption={topStage ? `${topStage.count} open exception${topStage.count === 1 ? "" : "s"} here` : "No open exceptions"}
+          good={!topStage}
+          warn={!!topStage && topStage.count <= 1}
+          bad={!!topStage && topStage.count > 1}
+          icon={<Waypoints className="h-5 w-5" />}
+          isText
         />
-        <StatCard
-          label="Avg resolution"
-          value={tower ? `${tower.avg_resolution_minutes.toFixed(1)}m` : "—"}
-          icon={<Gauge className="h-4 w-4" />}
-          tone="sky"
-        />
-        <StatCard
-          label="Exceptions today"
-          value={tower ? tower.exceptions_today.toLocaleString() : "—"}
-          icon={
-            exceptionsTrend !== null && exceptionsTrend > 0 ? (
-              <TrendingUp className="h-4 w-4" />
-            ) : (
-              <TrendingDown className="h-4 w-4" />
-            )
-          }
-          tone={
-            exceptionsTrend === null
-              ? "slate"
-              : exceptionsTrend > 0
-                ? "rose"
-                : "emerald"
-          }
-          sub={
-            exceptionsTrend !== null
-              ? `${exceptionsTrend > 0 ? "+" : ""}${exceptionsTrend.toFixed(0)}% vs yesterday`
-              : undefined
-          }
-        />
-        <StatCard
-          label="Top-risk client"
-          value={tower?.top_failing_clients[0]?.client_name ?? "—"}
-          icon={<Users className="h-4 w-4" />}
-          tone="violet"
-          small
+        <HeroStat
+          label="Highest-risk client"
+          value={topClient?.client_name ?? "None flagged"}
+          caption={topClient ? `${topClient.count} open exception${topClient.count === 1 ? "" : "s"}` : undefined}
+          good={!topClient}
+          warn={!!topClient && topClient.count <= 1}
+          bad={!!topClient && topClient.count > 1}
+          icon={<Crown className="h-5 w-5" />}
+          isText
         />
       </div>
 
       {/* Executive AI summary */}
-      <section className="rounded-xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950/30 to-slate-900/60 p-5">
+      <section className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950/30 to-slate-900/60 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-indigo-400" />
             <div>
               <div className="text-sm font-semibold text-white">Executive daily summary</div>
-              <div className="text-xs text-slate-400">AI-generated briefing from today's real numbers above</div>
+              <div className="text-xs text-slate-400">AI-generated briefing from today's real numbers</div>
             </div>
           </div>
           <button
@@ -221,197 +195,169 @@ export default function RiskControlTowerPage() {
         )}
       </section>
 
-      {/* Root cause breakdown */}
+      {/* Root cause breakdown — one consistent accent, honest %-of-total scale */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <section className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-          <h2 className="mb-3 text-sm font-semibold text-slate-100">
-            Root cause — open exceptions by stage
-          </h2>
-          {!tower || tower.top_failing_stages.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-800 bg-slate-900/30 p-8 text-center text-xs text-slate-500">
-              No open exceptions right now.
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {tower.top_failing_stages.map((s) => {
-                const max = tower.top_failing_stages[0].count || 1;
-                const pct = Math.max(6, (s.count / max) * 100);
-                return (
-                  <li key={s.stage} className="flex items-center gap-3">
-                    <span className="w-28 flex-none truncate text-xs font-medium text-slate-300">
-                      {STAGE_LABELS[s.stage as TradeStatus] ?? s.stage}
-                    </span>
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-rose-500 to-amber-500"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="w-6 flex-none text-right text-xs font-semibold tabular-nums text-slate-200">
-                      {s.count}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
-
-        <section className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-          <h2 className="mb-3 text-sm font-semibold text-slate-100">
-            Root cause — open exceptions by client
-          </h2>
-          {!tower || tower.top_failing_clients.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-800 bg-slate-900/30 p-8 text-center text-xs text-slate-500">
-              No open exceptions right now.
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {tower.top_failing_clients.map((c) => {
-                const max = tower.top_failing_clients[0].count || 1;
-                const pct = Math.max(6, (c.count / max) * 100);
-                return (
-                  <li key={c.client_id} className="flex items-center gap-3">
-                    <span className="w-28 flex-none truncate text-xs font-medium text-slate-300">
-                      {c.client_name ?? `Client ${c.client_id}`}
-                    </span>
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="w-6 flex-none text-right text-xs font-semibold tabular-nums text-slate-200">
-                      {c.count}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
+        <RootCausePanel
+          title="Where trades are breaking"
+          subtitle="Open exceptions by pipeline stage"
+          empty="No open exceptions right now."
+          total={tower?.open_exceptions ?? 0}
+          rows={
+            tower?.top_failing_stages.map((s) => ({
+              key: s.stage,
+              label: STAGE_LABELS[s.stage as TradeStatus] ?? s.stage,
+              count: s.count,
+            })) ?? []
+          }
+        />
+        <RootCausePanel
+          title="Who's driving the risk"
+          subtitle="Open exceptions by client"
+          empty="No open exceptions right now."
+          total={tower?.open_exceptions ?? 0}
+          rows={
+            tower?.top_failing_clients.map((c) => ({
+              key: String(c.client_id),
+              label: c.client_name ?? `Client ${c.client_id}`,
+              count: c.count,
+            })) ?? []
+          }
+        />
       </div>
-
-      {/* Digital Twin — live grid of at-risk / in-flight trades */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-100">
-            <Zap className="h-4 w-4 text-indigo-400" />
-            Live floor — trades in flight or in exception
-            <span className="text-slate-500">({liveTrades.length})</span>
-          </h2>
-          <Link href="/exceptions" className="text-xs text-indigo-300 hover:text-indigo-200">
-            Full exception queue →
-          </Link>
-        </div>
-
-        {loading && liveTrades.length === 0 ? (
-          <div className="flex h-40 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/40">
-            <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
-          </div>
-        ) : liveTrades.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/30 p-10 text-center text-xs text-slate-500">
-            No trades currently in flight — everything is DONE.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {liveTrades.map((t) => (
-              <LiveTradeTile key={t.id} trade={t} />
-            ))}
-          </div>
-        )}
-      </section>
     </div>
   );
 }
 
-function LiveTradeTile({ trade }: { trade: LiveTradeSummary }) {
-  const isException = trade.status === "EXCEPTION";
+function RootCausePanel({
+  title,
+  subtitle,
+  empty,
+  total,
+  rows,
+}: {
+  title: string;
+  subtitle: string;
+  empty: string;
+  total: number;
+  rows: { key: string; label: string; count: number }[];
+}) {
   return (
-    <div
-      className={clsx(
-        "rounded-lg border p-3 transition",
-        isException
-          ? "border-rose-500/40 bg-rose-500/5"
-          : "border-slate-800 bg-slate-900/50",
+    <section className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
+      <h2 className="text-sm font-semibold text-slate-100">{title}</h2>
+      <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
+
+      {rows.length === 0 ? (
+        <div className="mt-4 rounded-lg border border-dashed border-slate-800 bg-slate-900/30 p-8 text-center text-xs text-slate-500">
+          {empty}
+        </div>
+      ) : (
+        <ul className="mt-4 space-y-2">
+          {rows.map((r, idx) => {
+            const pct = total > 0 ? (r.count / total) * 100 : 0;
+            const isTop = idx === 0;
+            return (
+              <li
+                key={r.key}
+                className={clsx(
+                  "rounded-lg p-2.5",
+                  isTop && "border border-amber-500/30 bg-amber-500/[0.06]",
+                )}
+              >
+                <div className="mb-1 flex items-center justify-between gap-2 text-xs">
+                  <span className="flex items-center gap-1.5 truncate font-medium">
+                    {isTop && (
+                      <span className="flex-none rounded bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-300">
+                        Top cause
+                      </span>
+                    )}
+                    <span className={clsx("truncate", isTop ? "font-semibold text-amber-100" : "text-slate-300")}>
+                      {r.label}
+                    </span>
+                  </span>
+                  <span
+                    className={clsx(
+                      "flex-none font-semibold tabular-nums",
+                      isTop ? "text-amber-200" : "text-slate-200",
+                    )}
+                  >
+                    {r.count} <span className="text-slate-500">({pct.toFixed(0)}%)</span>
+                  </span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                  <div
+                    className={clsx(
+                      "h-full rounded-full",
+                      isTop ? "bg-amber-500" : "bg-rose-500/70",
+                    )}
+                    style={{ width: `${Math.max(pct, 3)}%` }}
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[11px] text-slate-500">#{trade.id}</span>
-        <span
-          className={clsx(
-            "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-            isException
-              ? "bg-rose-500/20 text-rose-200"
-              : "bg-indigo-500/15 text-indigo-200",
-          )}
-        >
-          {isException
-            ? `EXC @ ${trade.exception_stage ?? "?"}`
-            : trade.status}
-        </span>
-      </div>
-      <div className="mt-1.5 truncate text-sm font-semibold text-white">
-        {trade.instrument}
-      </div>
-      <div className="truncate text-xs text-slate-400">
-        {trade.client_name ?? "Unknown client"}
-      </div>
-    </div>
+    </section>
   );
 }
 
-function StatCard({
+function HeroStat({
   label,
   value,
+  caption,
   icon,
-  tone,
+  good,
+  warn,
+  bad,
   href,
-  sub,
-  small,
+  isText,
 }: {
   label: string;
   value: string;
+  caption?: string;
   icon: React.ReactNode;
-  tone: "indigo" | "sky" | "emerald" | "rose" | "violet" | "cyan" | "amber" | "slate";
+  good?: boolean;
+  warn?: boolean;
+  bad?: boolean;
   href?: string;
-  sub?: string;
-  small?: boolean;
+  isText?: boolean;
 }) {
-  const tones: Record<string, string> = {
-    indigo: "bg-indigo-500/10 text-indigo-300 ring-indigo-500/30",
-    sky: "bg-sky-500/10 text-sky-300 ring-sky-500/30",
-    emerald: "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30",
-    rose: "bg-rose-500/10 text-rose-300 ring-rose-500/30",
-    violet: "bg-violet-500/10 text-violet-300 ring-violet-500/30",
-    cyan: "bg-cyan-500/10 text-cyan-300 ring-cyan-500/30",
-    amber: "bg-amber-500/10 text-amber-300 ring-amber-500/30",
-    slate: "bg-slate-500/10 text-slate-300 ring-slate-500/30",
-  };
+  const tone = bad
+    ? "border-rose-500/40 bg-gradient-to-br from-rose-500/10 to-slate-900/60"
+    : warn
+      ? "border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-slate-900/60"
+      : "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-slate-900/60";
+  const valueColor = bad ? "text-rose-300" : warn ? "text-amber-300" : "text-emerald-300";
+  const iconTone = bad
+    ? "bg-rose-500/15 text-rose-300"
+    : warn
+      ? "bg-amber-500/15 text-amber-300"
+      : "bg-emerald-500/15 text-emerald-300";
+
   const content = (
-    <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3 transition hover:bg-slate-900/80">
-      <div className="min-w-0">
-        <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-          {label}
+    <div className={clsx("rounded-2xl border p-6 transition", tone, href && "hover:brightness-110")}>
+      <div className="flex items-start justify-between">
+        <div className="text-xs font-semibold uppercase tracking-widest text-slate-400">{label}</div>
+        <div className={clsx("flex h-9 w-9 flex-none items-center justify-center rounded-lg", iconTone)}>
+          {icon}
         </div>
-        <div
-          className={clsx(
-            "mt-1 truncate font-bold tabular-nums text-white",
-            small ? "text-sm" : "text-xl",
-          )}
-        >
-          {value}
-        </div>
-        {sub && <div className="mt-0.5 text-[10px] text-slate-500">{sub}</div>}
       </div>
       <div
         className={clsx(
-          "flex h-9 w-9 flex-none items-center justify-center rounded-lg ring-1 ring-inset",
-          tones[tone],
+          "mt-2 truncate font-black tracking-tight",
+          isText ? "text-2xl" : "text-4xl tabular-nums",
+          valueColor,
         )}
+        title={value}
       >
-        {icon}
+        {value}
       </div>
+      {caption && <div className="mt-1.5 text-xs text-slate-400">{caption}</div>}
+      {href && (
+        <div className="mt-3 flex items-center gap-1 text-xs font-medium text-slate-400">
+          View exceptions <ArrowRight className="h-3 w-3" />
+        </div>
+      )}
     </div>
   );
   if (href) {
