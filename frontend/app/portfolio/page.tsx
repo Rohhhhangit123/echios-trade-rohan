@@ -88,23 +88,24 @@ export default function PortfolioPage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
+          <div className="eyebrow mb-1">Asset Management</div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            <Briefcase className="h-7 w-7 text-emerald-400" />
-            Portfolio & P&L
+            <Briefcase className="h-7 w-7 text-[#34D399]" />
+            Portfolio &amp; P&amp;L
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Live positions, weighted-avg cost basis, and unrealized P&L.
+          <p className="mt-1 text-sm text-[#8FA4BD]">
+            Live positions, weighted-avg cost basis, and unrealized P&amp;L.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <label className="text-[10px] uppercase tracking-widest text-slate-500">
+            <label className="eyebrow text-[11px]">
               Client
             </label>
             <select
               value={clientId}
               onChange={(e) => setClientId(parseInt(e.target.value, 10))}
-              className="rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-200 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+              className="rounded-lg border border-[#2A2F38] bg-[#191d23] px-3.5 py-1.5 text-sm font-mono text-[#EFF0F2] focus:border-[#4FA9E8] focus:outline-none focus:ring-2 focus:ring-[#4FA9E8]/30"
             >
               {CLIENT_CHOICES.map((c) => (
                 <option key={c.id} value={c.id}>

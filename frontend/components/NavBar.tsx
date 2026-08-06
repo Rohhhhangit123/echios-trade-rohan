@@ -24,6 +24,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import type { UserRole } from "@/lib/types";
 import { ROLE_DISPLAY_NAME, ROLE_HOME, navItemsForRole } from "@/lib/personas";
+import Image from "next/image";
 
 
 const SWITCHABLE_ROLES: UserRole[] = ["ADMIN", "TRADER", "RISK", "ASSET"];
@@ -36,8 +37,8 @@ const NAV_ICONS: Record<string, typeof Activity> = {
   "/portfolio/risk": PieChart,
   "/trade-entry": PlusCircle,
   "/paper-trading": Sparkles,
-   "/assistant": Bot,
-    "/charts": CandlestickChart,
+  "/assistant": Bot,
+  "/charts": CandlestickChart,
 };
 
 const ROLE_STYLES: Record<UserRole, string> = {
@@ -111,24 +112,25 @@ export default function NavBar() {
   const navItems = user ? navItemsForRole(user.role) : [];
 
   return (
-    <header className="sticky top-0 z-30 border-b border-purple-950/40 bg-[#0d0a12]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#0d0a12]/70">
+    <header className="sticky top-0 z-30 border-b border-[#2A2F38] bg-[#101317]/90 backdrop-blur-xl supports-[backdrop-filter]:bg-[#101317]/80">
       <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:px-8">
-        <Link href="/dashboard" className="group flex shrink-0 items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 text-white shadow-lg shadow-purple-600/30 transition-transform duration-300 group-hover:scale-105">
-            <LineChart className="h-5 w-5" />
+        <Link href="/dashboard" className="group flex shrink-0 items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#191d23] shadow-md transition-transform duration-300 group-hover:scale-105">
+
+            <Image src="/laminar-icon-transparent.svg" alt="Logo" width={150} height={60} />
           </div>
           <div className="leading-none">
             <div className="flex items-center gap-1.5">
-              <span className="text-base font-extrabold tracking-wider text-white letter">LAMINAR</span>
-              <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-purple-300 ring-1 ring-inset ring-purple-500/30">
+              <span className="text-lg font-bold tracking-widest text-white">LAMINAR</span>
+              <span className="rounded bg-[#8B6EE0]/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#C9B8F5] ring-1 ring-inset ring-[#8B6EE0]/30">
                 PRO
               </span>
             </div>
-            <div className="mt-0.5 text-[10px] font-medium tracking-widest text-slate-400">STP TRADING ENGINE</div>
+            <div className="mt-0.5 text-[10px] font-mono tracking-tight uppercase text-[#5E7A99]">Straight-Through Processing</div>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-1 overflow-x-auto rounded-xl border border-purple-900/30 bg-purple-950/20 p-1 backdrop-blur-md md:flex">
+        <nav className="hidden items-center gap-1 overflow-x-auto rounded-xl border border-[#2A2F38] bg-[#191d23] p-1 backdrop-blur-md md:flex">
           {navItems.map((item) => {
             const Icon = NAV_ICONS[item.href] ?? Activity;
             const active = pathname === item.href;
@@ -139,11 +141,11 @@ export default function NavBar() {
                 className={clsx(
                   "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-200",
                   active
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/25"
-                    : "text-slate-400 hover:bg-purple-900/30 hover:text-slate-200",
+                    ? "bg-gradient-to-r from-[#4FA9E8] to-[#8B6EE0] text-[#1A1E24] font-bold shadow-md shadow-[#4FA9E8]/20"
+                    : "text-[#8FA4BD] hover:bg-[#262D3D]/60 hover:text-white",
                 )}
               >
-                <Icon className={clsx("h-4 w-4", active ? "text-white" : "text-slate-400")} />
+                <Icon className={clsx("h-4 w-4", active ? "text-[#1A1E24]" : "text-[#8FA4BD]")} />
                 <span>{item.label}</span>
               </Link>
             );

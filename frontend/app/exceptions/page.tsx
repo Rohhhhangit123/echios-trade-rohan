@@ -47,18 +47,19 @@ export default function ExceptionsPage() {
     <div className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
+          <div className="eyebrow mb-1">Operations &amp; Control</div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            <AlertTriangle className="h-7 w-7 text-rose-400" />
+            <AlertTriangle className="h-7 w-7 text-[#F87171]" />
             Exception Queue
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[#8FA4BD]">
             Ops triage — resolve exceptions and re-run the failed pipeline stage.
           </p>
         </div>
         <button
           onClick={load}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[#2A2F38] bg-[#191d23] px-3.5 py-1.5 text-xs font-semibold text-[#EFF0F2] hover:bg-[#262D3D] disabled:opacity-50"
         >
           <RefreshCw className={clsx("h-3.5 w-3.5", loading && "animate-spin")} />
           Refresh

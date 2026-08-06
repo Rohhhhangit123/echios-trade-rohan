@@ -442,16 +442,17 @@ export default function AssistantPage() {
     <div className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-5xl flex-col gap-4">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
+          <div className="eyebrow mb-1">AI Intelligence</div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            <Bot className="h-7 w-7 text-violet-400" />
+            <Bot className="h-7 w-7 text-[#8B6EE0]" />
             AI Portfolio Assistant
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[#8FA4BD]">
             Account-aware portfolio intelligence with semantic market retrieval.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-xs text-slate-300">
-          <ShieldCheck className="h-4 w-4 text-emerald-400" />
+        <div className="flex items-center gap-2 rounded-lg border border-[#2A2F38] bg-[#191d23] px-3 py-2 text-xs font-mono text-[#EFF0F2]">
+          <ShieldCheck className="h-4 w-4 text-[#34D399]" />
           <span>{clientName}</span>
         </div>
       </header>

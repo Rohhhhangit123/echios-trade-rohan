@@ -167,34 +167,34 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-400">
-            <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
-            STP Operations Hub
+          <div className="eyebrow flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#4FA9E8] animate-pulse" />
+            STP Operations Control
           </div>
-          <h1 className="mt-1 flex items-center gap-2.5 text-2xl font-black tracking-tight text-white sm:text-3xl">
-            <Activity className="h-7 w-7 text-indigo-400" />
-            Live Trade Operations
+          <h1 className="mt-1 flex items-center gap-2.5 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            <Activity className="h-7 w-7 text-[#4FA9E8]" />
+            Live Operations Workspace
           </h1>
-          <p className="mt-1 text-xs text-slate-400 sm:text-sm">
-            Real-time Straight-Through Processing: 11-stage automated pipeline.
+          <p className="mt-1 text-xs text-[#8FA4BD] sm:text-sm">
+            Real-time Straight-Through Processing — 11-stage automated pipeline with exception orchestration.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <div
             className={clsx(
-              "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition-all",
+              "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-mono font-semibold transition-all",
               connected
-                ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 glow-emerald"
-                : "border border-amber-500/30 bg-amber-500/10 text-amber-300",
+                ? "border border-[#10B981]/30 bg-[#10B981]/15 text-[#34D399]"
+                : "border border-[#F59E0B]/30 bg-[#F59E0B]/15 text-[#FBBF24]",
             )}
           >
-            <span className={clsx("h-2 w-2 rounded-full", connected ? "bg-emerald-400 animate-ping" : "bg-amber-400")} />
+            <span className={clsx("h-2 w-2 rounded-full", connected ? "bg-[#34D399] animate-ping" : "bg-[#FBBF24]")} />
             {connected ? "LIVE WEBSOCKET" : "RECONNECTING…"}
           </div>
           <button
             onClick={refreshAll}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-xs font-semibold text-slate-200 shadow-md transition hover:border-slate-600 hover:bg-slate-800 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#2A2F38] bg-[#191d23] px-4 py-2 text-xs font-semibold text-[#EFF0F2] shadow-md transition hover:border-[#4FA9E8]/40 hover:bg-[#262D3D] disabled:opacity-50"
           >
             <RefreshCw className={clsx("h-3.5 w-3.5", loading && "animate-spin")} />
             Sync
@@ -362,13 +362,13 @@ function StatCard({
   badgeHref?: string;
 }) {
   const tones: Record<string, { bg: string; text: string; border: string; glow: string }> = {
-    indigo: { bg: "bg-indigo-500/10", text: "text-indigo-300", border: "border-indigo-500/30", glow: "hover:border-indigo-500/50" },
-    sky: { bg: "bg-sky-500/10", text: "text-sky-300", border: "border-sky-500/30", glow: "hover:border-sky-500/50" },
-    emerald: { bg: "bg-emerald-500/10", text: "text-emerald-300", border: "border-emerald-500/30", glow: "hover:border-emerald-500/50" },
-    rose: { bg: "bg-rose-500/10", text: "text-rose-300", border: "border-rose-500/30", glow: "hover:border-rose-500/50" },
-    violet: { bg: "bg-violet-500/10", text: "text-violet-300", border: "border-violet-500/30", glow: "hover:border-violet-500/50" },
-    cyan: { bg: "bg-cyan-500/10", text: "text-cyan-300", border: "border-cyan-500/30", glow: "hover:border-cyan-500/50" },
-    slate: { bg: "bg-slate-500/10", text: "text-slate-300", border: "border-slate-500/30", glow: "hover:border-slate-500/50" },
+    indigo: { bg: "bg-[#4FA9E8]/15", text: "text-[#4FA9E8]", border: "border-[#4FA9E8]/30", glow: "hover:border-[#4FA9E8]/50" },
+    sky: { bg: "bg-[#4FA9E8]/15", text: "text-[#4FA9E8]", border: "border-[#4FA9E8]/30", glow: "hover:border-[#4FA9E8]/50" },
+    emerald: { bg: "bg-[#10B981]/15", text: "text-[#34D399]", border: "border-[#10B981]/30", glow: "hover:border-[#10B981]/50" },
+    rose: { bg: "bg-[#F43F5E]/15", text: "text-[#F87171]", border: "border-[#F43F5E]/30", glow: "hover:border-[#F43F5E]/50" },
+    violet: { bg: "bg-[#8B6EE0]/15", text: "text-[#C9B8F5]", border: "border-[#8B6EE0]/30", glow: "hover:border-[#8B6EE0]/50" },
+    cyan: { bg: "bg-[#4FA9E8]/15", text: "text-[#4FA9E8]", border: "border-[#4FA9E8]/30", glow: "hover:border-[#4FA9E8]/50" },
+    slate: { bg: "bg-[#262D3D]", text: "text-[#8FA4BD]", border: "border-[#2A2F38]", glow: "hover:border-[#3A4356]" },
   };
 
   const t = tones[tone];
@@ -376,15 +376,15 @@ function StatCard({
   const content = (
     <div
       className={clsx(
-        "glass-card glass-card-hover flex items-center justify-between rounded-xl px-4 py-3.5 transition-all duration-300",
+        "card-gradient flex items-center justify-between rounded-xl px-4 py-3.5 transition-all duration-300",
         t.glow,
       )}
     >
       <div className="min-w-0">
-        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <div className="text-[11px] font-mono uppercase tracking-widest text-[#5E7A99]">
           {label}
         </div>
-        <div className="mt-1 truncate text-xl font-extrabold tabular-nums tracking-tight text-white">
+        <div className="mt-1 truncate text-xl font-bold tabular-nums tracking-tight text-[#EFF0F2]">
           {value}
         </div>
       </div>
