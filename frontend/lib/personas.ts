@@ -7,6 +7,7 @@ export interface NavItemDef {
 
 export const ALL_PAGES: NavItemDef[] = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/risk", label: "Risk Control Tower" },
   { href: "/exceptions", label: "Exceptions" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/trade-entry", label: "Trade Entry" },
@@ -24,11 +25,13 @@ export const ROLE_DISPLAY_NAME: Record<UserRole, string> = {
   VIEWER: "Asset Manager",
 };
 
-// Pages each persona is wired to see. Admin always sees everything.
+// Pages each persona is wired to see.
 export const ROLE_PAGES: Record<UserRole, string[]> = {
-  ADMIN: ALL_PAGES.map((p) => p.href),
+  ADMIN: ALL_PAGES.map((p) => p.href).filter(
+    (href) => href !== "/risk" && href !== "/paper-trading",
+  ),
   TRADER: ["/dashboard", "/trade-entry", "/paper-trading", "/charts"],
-  COMPLIANCE: ["/exceptions", "/dashboard"],
+  COMPLIANCE: ["/risk", "/exceptions", "/dashboard"],
   VIEWER: ["/portfolio", "/assistant"],
 };
 
@@ -36,7 +39,7 @@ export const ROLE_PAGES: Record<UserRole, string[]> = {
 export const ROLE_HOME: Record<UserRole, string> = {
   ADMIN: "/dashboard",
   TRADER: "/dashboard",
-  COMPLIANCE: "/exceptions",
+  COMPLIANCE: "/risk",
   VIEWER: "/portfolio",
 };
 

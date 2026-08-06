@@ -210,6 +210,45 @@ export interface WsMessage {
   breaking_field?: string | null;
 }
 
+export interface StageFailureCount {
+  stage: TradeStatus;
+  count: number;
+}
+
+export interface ClientFailureCount {
+  client_id: number;
+  client_name: string | null;
+  count: number;
+}
+
+export interface ControlTowerResponse {
+  total_trades: number;
+  done_trades: number;
+  stp_rate: number;
+  open_exceptions: number;
+  exception_rate: number;
+  avg_resolution_minutes: number;
+  top_failing_stages: StageFailureCount[];
+  top_failing_clients: ClientFailureCount[];
+  exceptions_today: number;
+  exceptions_yesterday: number;
+}
+
+export interface LiveTradeSummary {
+  id: number;
+  client_name: string | null;
+  instrument: string;
+  status: TradeStatus;
+  last_successful_stage: TradeStatus | null;
+  exception_stage: TradeStatus | null;
+  updated_at: string;
+}
+
+export interface RiskDailySummaryResponse {
+  narrative: string;
+  generated_at: string;
+}
+
 export type Tick = {
   symbol: string;
   timestamp: string;

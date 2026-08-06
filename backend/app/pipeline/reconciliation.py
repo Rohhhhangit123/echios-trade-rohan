@@ -31,17 +31,28 @@ async def run_stage(trade: Trade, session: AsyncSession, simulated: bool = False
     all_keys = set(internal.keys()) | set(bank.keys())
     mismatches: list[str] = []
     for k in sorted(all_keys):
+        currency, security = k.split("|", 1)
         i_cash, i_sec = internal[k]
         b_cash, b_sec = bank[k]
-        if abs(i_cash - (-b_cash)) > Decimal("0.01"):
-            mismatches.append(f"cash@{k}: internal={i_cash} bank={-b_cash} diff={i_cash + b_cash}")
-        if abs(i_sec - (-b_sec)) > Decimal("0.0001"):
-            mismatches.append(f"sec@{k}: internal={i_sec} bank={-b_sec} diff={i_sec + b_sec}")
+        expected_bank_cash = -i_cash
+        expected_bank_sec = -i_sec
+        cash_diff = b_cash - expected_bank_cash
+        sec_diff = b_sec - expected_bank_sec
+        if abs(cash_diff) > Decimal("0.01"):
+            mismatches.append(
+                f"Cash ({currency}): our books show {i_cash:,.2f}, bank statement implies "
+                f"{-b_cash:,.2f} — off by {abs(cash_diff):,.2f}"
+            )
+        if abs(sec_diff) > Decimal("0.0001"):
+            mismatches.append(
+                f"{security} position: our books show {i_sec:,.4f}, bank statement implies "
+                f"{-b_sec:,.4f} — off by {abs(sec_diff):,.4f} shares"
+            )
 
     if mismatches:
         await raise_exception(
             session, trade, TradeStatus.RECONCILED,
-            reason="Internal ledger vs bank statement mismatch: " + "; ".join(mismatches),
+            reason="Internal ledger vs bank statement mismatch. " + "; ".join(mismatches) + ".",
             breaking_field="settlement_mode",
         )
         return False, None

@@ -107,11 +107,14 @@ async function request<T>(
 import type {
   AssistantChatResponse,
   AssistantHistoryMessage,
+  ControlTowerResponse,
   GenaiExplainExceptionResponse,
   GenaiParseOrderResponse,
+  LiveTradeSummary,
   LoginRequest,
   PortfolioSummary,
   RegisterRequest,
+  RiskDailySummaryResponse,
   TokenResponse,
   Tick,
   Trade,
@@ -244,6 +247,16 @@ export const api = {
   request<{ symbol: string; candles: Tick[] }>(
     `/market/candles?symbol=${encodeURIComponent(symbol)}&count=${count}`,
   ),
- 
+
+  getControlTower: () => request<ControlTowerResponse>("/analytics/control-tower"),
+
+  getLiveTrades: (limit = 100) =>
+    request<LiveTradeSummary[]>(`/analytics/live-trades?limit=${limit}`),
+
+  genaiRiskDailySummary: () =>
+    request<RiskDailySummaryResponse>("/genai/risk-daily-summary", {
+      method: "POST",
+      body: "{}",
+    }),
 };
 

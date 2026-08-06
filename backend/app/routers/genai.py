@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,16 +8,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_settings
 from app.db import get_db
 from app.models import TradeException
+from app.routers.analytics import compute_control_tower
 from app.schemas import (
     AssistantChatRequest,
     AssistantChatResponse,
     GenaiExplainExceptionResponse,
     GenaiParseOrderRequest,
     GenaiParseOrderResponse,
+    RiskDailySummaryResponse,
 )
 from app.services.assistant_retrieval import build_assistant_context
 from app.services.assistant_service import answer_question
-from app.services.genai_service import GenaiNotConfiguredError, explain_exception, parse_order
+from app.services.genai_service import (
+    GenaiNotConfiguredError,
+    explain_exception,
+    parse_order,
+    risk_daily_summary,
+)
 
 router = APIRouter(prefix="/genai", tags=["genai"])
 
@@ -47,6 +54,18 @@ async def genai_explain_exception(
     except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"Claude API error: {e}")
     return GenaiExplainExceptionResponse(**sections)
+
+
+@router.post("/risk-daily-summary", response_model=RiskDailySummaryResponse)
+async def genai_risk_daily_summary(db: AsyncSession = Depends(get_db)) -> RiskDailySummaryResponse:
+    control_tower = await compute_control_tower(db)
+    try:
+        narrative = await risk_daily_summary(control_tower.model_dump())
+    except GenaiNotConfiguredError as e:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
+    except Exception as e:  # pragma: no cover
+        raise HTTPException(status_code=500, detail=f"Claude API error: {e}")
+    return RiskDailySummaryResponse(narrative=narrative, generated_at=datetime.now(timezone.utc))
 
 
 @router.post("/assistant", response_model=AssistantChatResponse)

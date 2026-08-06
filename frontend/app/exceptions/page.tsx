@@ -149,7 +149,7 @@ export default function ExceptionsPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4">
           {items.map((exc) => (
             <ExceptionCard
               key={exc.id}

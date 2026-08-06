@@ -202,6 +202,47 @@ class AssistantChatResponse(_Base):
     citations: list[AssistantCitation] = Field(default_factory=list)
 
 
+# ---------- Analytics / Risk (Control Tower + Digital Twin) ----------
+
+class StageFailureCount(_Base):
+    stage: TradeStatus
+    count: int
+
+
+class ClientFailureCount(_Base):
+    client_id: int
+    client_name: Optional[str] = None
+    count: int
+
+
+class ControlTowerResponse(_Base):
+    total_trades: int
+    done_trades: int
+    stp_rate: float
+    open_exceptions: int
+    exception_rate: float
+    avg_resolution_minutes: float
+    top_failing_stages: list[StageFailureCount] = []
+    top_failing_clients: list[ClientFailureCount] = []
+    exceptions_today: int
+    exceptions_yesterday: int
+
+
+class LiveTradeSummary(_Base):
+    id: int
+    client_name: Optional[str] = None
+    instrument: str
+    status: TradeStatus
+    last_successful_stage: Optional[TradeStatus] = None
+    exception_stage: Optional[TradeStatus] = None
+    updated_at: datetime
+
+
+class RiskDailySummaryResponse(_Base):
+    narrative: str
+    generated_at: datetime
+
+
 # ---------- Misc ----------
 
 class HealthResponse(_Base):
