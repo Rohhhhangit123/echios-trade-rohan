@@ -60,11 +60,23 @@ export default function QuoteCard({ symbol }: QuoteCardProps) {
   }, []);
 
   // Push candle data whenever the buffer updates
-  useEffect(() => {
+useEffect(() => {
     if (!seriesRef.current || candles.length === 0) return;
 
-    const barData = candles.map((c) => ({
-      time: (Math.floor(new Date(c.timestamp).getTime() / 1000)) as UTCTimestamp,
+    const ordered = [...candles].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    );
+
+    const intervalSeconds = 60; // one bar per minute — adjust if your interval differs
+
+    // lightweight-charts renders UTCTimestamp using UTC getters, not the
+    // browser's local timezone, so shift by the local offset to make the
+    // displayed digits match the viewer's actual wall-clock time.
+    const localOffsetSeconds = -new Date().getTimezoneOffset() * 60;
+    const nowSeconds = Math.floor(Date.now() / 1000) + localOffsetSeconds;
+
+    const barData = ordered.map((c, i) => ({
+      time: (nowSeconds - (ordered.length - 1 - i) * intervalSeconds) as UTCTimestamp,
       open: c.open,
       high: c.high,
       low: c.low,
